@@ -1,0 +1,25 @@
+.body_c {
+  background-color: black;
+  align-content: center;
+}
+
+.body_c h1 {
+  color: aliceblue;
+}
+
+.body_c h4 {
+  color: antiquewhite;
+}
+
+.body_c span {
+  color: aliceblue;
+  padding-left: 80px;
+  padding-right: 80px;
+}
+
+.body_c img {
+  height: 200px;
+  width: 250px;
+  border-color: aliceblue;
+  border-style: double;
+}
