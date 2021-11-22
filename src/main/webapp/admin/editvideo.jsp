@@ -19,7 +19,8 @@
   </head>
   <body>
   <c:url var="url" value="/AdminServlet"></c:url>
-    <div class="container rounded bg-white mt-5 mb-5">
+
+    <div  class="container rounded bg-white mt-5 mb-5">
      <form action="${url }" method="post" enctype="multipart/form-data">
      	 <div class="row">
         <div class="col-md-5 border-right">
@@ -126,10 +127,7 @@
               <button class="btn btn-primary profile-button" onclick="removereq()" formaction="${url }/updatevideo">
                 Update
               </button>
-              <button class="btn btn-primary profile-button" type="button">
-                Delete
-              </button>
-              <button class="btn btn-primary profile-button" type="button">
+              <button class="btn btn-primary profile-button" formaction="${url }/resetvideo" >
                 Reset
               </button>
             </div>
@@ -138,6 +136,11 @@
       </div>
      </form>
     </div>
+      <c:if test="${message != null }">
+  	 <jsp:include page="toasts.jsp">
+   <jsp:param value="${message }" name="message"/>
+   </jsp:include>
+  </c:if>
     <script type="text/javascript" src="${pageContext.request.contextPath}/admin/js/editvideo.js"></script>
   </body>
 </html>

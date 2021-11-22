@@ -1,5 +1,7 @@
 package com.poly.dao;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
@@ -81,6 +83,19 @@ public class FavoriteDAO {
 			em.close();
 		}
 	}
+	public Favorite findByVideoID(String videoId) {
+		try {
+			EntityManager em = JpaUtils.getEntityManager();
+			String jpql = "SELECT f FROM Favorite f WHERE "
+					+ " f.video.id=:videoId";
+			TypedQuery<Favorite> query = em.createQuery(jpql, Favorite.class);
+			query.setParameter("videoId", videoId);
+			return query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	public Favorite findLikeVideoCookie(String videoId, String userId) {
 		try {
 			EntityManager em = JpaUtils.getEntityManager();
@@ -96,12 +111,18 @@ public class FavoriteDAO {
 		return null;
 	}
 	public Favorite findLikeVideo(String videoId, String userId) {		
-		EntityManager em = JpaUtils.getEntityManager();
+		try {
+			EntityManager em = JpaUtils.getEntityManager();
 			String jpql = "SELECT f FROM Favorite f WHERE "
 					+ " f.video.id=:videoId AND f.user.id=:userId";
 			TypedQuery<Favorite> query = em.createQuery(jpql, Favorite.class);
 			query.setParameter("videoId", videoId);
 			query.setParameter("userId", userId);
 			return query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
+		return null;
 	}
 }

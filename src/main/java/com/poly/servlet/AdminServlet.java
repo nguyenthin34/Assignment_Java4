@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javax.security.auth.message.callback.PrivateKeyCallback.Request;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -14,25 +15,47 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import javax.servlet.jsp.PageContext;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import com.poly.dao.FavoriteDAO;
+import com.poly.dao.ReportDAO;
 import com.poly.dao.UserDAO;
 import com.poly.dao.VideoDAO;
+import com.poly.entity.Favorite;
+import com.poly.entity.Report;
+import com.poly.entity.Report2;
+import com.poly.entity.Report3;
 import com.poly.entity.User;
 import com.poly.entity.Video;
 import com.poly.helper.CookieUtils;
 import com.poly.helper.XScope;
 @MultipartConfig
 @WebServlet({"/AdminServlet", "/AdminServlet/signinad", "/AdminServlet/listvideo"
-	, "/AdminServlet/editvideo", "/AdminServlet/insertvideo", "/AdminServlet/updatevideo"})
+	, "/AdminServlet/editvideo", "/AdminServlet/insertvideo", "/AdminServlet/updatevideo"
+	, "/AdminServlet/resetvideo", "/AdminServlet/removevideo", "/AdminServlet/listuser"
+	,"/AdminServlet/edituser","/AdminServlet/updateuser","/AdminServlet/removeuser"
+	,"/AdminServlet/favorites","/AdminServlet/findfv","/AdminServlet/favoritesuser"
+	,"/AdminServlet/findfavouser","/AdminServlet/shared","/AdminServlet/findshared"
+	,"/AdminServlet/home","/AdminServlet/signout"})
 public class AdminServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String uri = request.getRequestURI();
 		VideoDAO dao = new VideoDAO();
+		UserDAO daou = new UserDAO();
 		if(uri.contains("listvideo") ){
 			listVideo(request, response);
+		}else if(uri.contains("home")) {
+			request.setAttribute("views", "homepage.jsp");
+			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+		}else if(uri.contains("signout")) {
+			XScope.setApplication(request, "username", null);
+			ServletContext application = request.getServletContext();
+			application.setAttribute("user", null);
+			request.setAttribute("views", "signin.jsp");
+			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 		}else if(uri.contains("editvideo")) {
 			String videoid = request.getParameter("VideoID");
 			if(videoid != null) {
@@ -41,6 +64,32 @@ public class AdminServlet extends HttpServlet {
 			}
 			request.setAttribute("views", "editvideo.jsp");
 			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+		}else if(uri.contains("removevideo")) {
+			removevideo(request, response);
+		}else if(uri.contains("listuser")) {
+			listUser(request, response);
+		}else if(uri.contains("edituser")) {
+			String userid = request.getParameter("UserID");
+			if(userid != null) {
+				User user = daou.findByID(userid);
+				request.setAttribute("user", user);
+			}
+			request.setAttribute("views", "edituser.jsp");
+			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+		}else if(uri.contains("removeuser")) {
+			removeuser(request, response);
+		}else if(uri.contains("findfavouser")) {
+			findlistfavoriteuser(request, response);
+		}else if(uri.contains("favoritesuser")) {
+			listfavoriteUser(request, response);
+		}else if(uri.contains("favorites")) {
+			listfavorite(request, response);
+		}else if(uri.contains("findfv")) {
+			findlistfavorite(request, response);
+		}else if(uri.contains("findshared")) {
+			findlistshared(request, response);
+		}else if(uri.contains("shared")) {
+			listshare(request, response);
 		}else{
 			request.setAttribute("views", "signin.jsp");
 			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
@@ -55,6 +104,13 @@ public class AdminServlet extends HttpServlet {
 			insertvideo(request, response);
 		}else if(uri.contains("updatevideo")) {
 			updatevideo(request, response);
+		}else if(uri.contains("resetvideo")) {
+			Video video = new Video();
+			request.setAttribute("videore", video);
+			request.setAttribute("views", "editvideo.jsp");		
+			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+		}else if(uri.contains("updateuser")) {
+			updateuser(request, response);
 		}
 	}
 	protected void signin(HttpServletRequest request, HttpServletResponse response)
@@ -72,11 +128,14 @@ public class AdminServlet extends HttpServlet {
 						if(remember != null) {
 							CookieUtils.add("UserAdminID", username, 30*24, response);
 						}
-						request.setAttribute("message", "Thành Công");
+						request.setAttribute("message", "Login Success");
 						ServletContext application = request.getServletContext();
 						application.setAttribute("user", user);
 					}else {
 						request.setAttribute("message", "you can't login here");
+						request.setAttribute("views", "signin.jsp");
+						request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+						return;
 					}
 				}else{
 					request.setAttribute("message", "Incorrect password");
@@ -101,7 +160,11 @@ public class AdminServlet extends HttpServlet {
 			throws ServletException, IOException {
 		VideoDAO dao = new VideoDAO();
 		List<Video> listvideo = dao.findpage();
-		request.setAttribute("listvideo", listvideo);
+		if(listvideo != null) {
+			request.setAttribute("listvideo", listvideo);
+		}else {
+			request.setAttribute("listvideo", "List Not Empty");
+		}
 		request.setAttribute("views", "listvideo.jsp");
 		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 	}
@@ -125,11 +188,20 @@ public class AdminServlet extends HttpServlet {
 		try {
 			video.setPoster(imagefilename);
 			BeanUtils.populate(video, request.getParameterMap());
-			dao.insert(video);
-			request.setAttribute("message", "success");
-			request.setAttribute("views", "editvideo.jsp");
+			Video checkvideo = dao.findByID(video.getId());
+			if(checkvideo == null) {
+				dao.insert(video);
+				request.setAttribute("message", "Insert Success");
+				request.setAttribute("views", "editvideo.jsp");
+			}else {
+				request.setAttribute("message", "Video already exists");
+				request.setAttribute("views", "editvideo.jsp");
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
+			request.setAttribute("message", "Insert Failed");
+			request.setAttribute("views", "editvideo.jsp");
 		}
 		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 	}
@@ -163,9 +235,11 @@ public class AdminServlet extends HttpServlet {
 			try {
 				BeanUtils.populate(video, request.getParameterMap());
 				dao.update(video);
-				request.setAttribute("message", "success");
+				request.setAttribute("message", "Update Success");
 				request.setAttribute("views", "editvideo.jsp");
 			} catch (Exception e) {
+				request.setAttribute("message", "Update Failed");
+				request.setAttribute("views", "editvideo.jsp");
 				e.printStackTrace();
 			}
 		}else {
@@ -174,5 +248,176 @@ public class AdminServlet extends HttpServlet {
 		}
 		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 	}
+	protected void removevideo(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			VideoDAO dao = new VideoDAO();
+			String videoid = request.getParameter("VideoID");
+			if(videoid == null) {
+				request.setAttribute("message", "Video ID Null!!!");
+				request.setAttribute("views", "listvideo.jsp");
+			}else {
+				Video video = dao.findByID(videoid);
+				if(video != null) {
+						dao.delete(videoid);
+						request.setAttribute("message", "Delete Success!!!");
+						request.setAttribute("views", "listvideo.jsp");	
+				}else{
+					request.setAttribute("message", "Video Not Exists!!!");
+					request.setAttribute("views", "listvideo.jsp");	
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("message", "Can't delete video!!!");
+			request.setAttribute("views", "listvideo.jsp");	
+		}
+		listVideo(request, response);
+	}
 	
+	protected void listUser(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		UserDAO dao = new UserDAO();
+		List<User> listuser = dao.findAll();
+		
+		if(listuser != null) {
+			request.setAttribute("listuser", listuser);
+		}else {
+			request.setAttribute("message", "List is empty");
+		}
+		request.setAttribute("views", "listuser.jsp");
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	protected void updateuser(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		try {
+			UserDAO dao = new UserDAO();
+			User cuser = dao.findByID(request.getParameter("id"));
+			if(cuser != null) {
+				User nuser = new User();
+				BeanUtils.populate(nuser, request.getParameterMap());
+				dao.update(nuser);
+				request.setAttribute("user", nuser);
+				request.setAttribute("message", "Update User Success");
+				request.setAttribute("views", "edituser.jsp");
+			}else {
+				request.setAttribute("message", "User not exists");
+				request.setAttribute("views", "edituser.jsp");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("message", "Update failed");
+			request.setAttribute("views", "edituser.jsp");
+		}
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	protected void removeuser(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			UserDAO dao = new UserDAO();
+			String userid = request.getParameter("UserID");
+			if(userid == null) {
+				request.setAttribute("message", "User ID Null!!!");
+			}else {
+				User user = dao.findByID(userid);
+				if(user != null) {
+					dao.delete(userid);
+					request.setAttribute("message", "Delete Success!!!");
+				}else{
+					request.setAttribute("message", "User Not Exists!!!");	
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("message", "Can't delete User!!!");	
+		}
+		request.setAttribute("views", "listuser.jsp");	
+		listUser(request, response);
+	}
+	protected void listfavorite(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		ReportDAO dao = new ReportDAO();	
+		List<Report> listreport = dao.favorites();
+		if(listreport != null) {
+			request.setAttribute("listreport", listreport);
+		}else {
+			request.setAttribute("message", "List Favorite Not Empty");
+		}
+		request.setAttribute("views", "RpFavorites.jsp");	
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	protected void findlistfavorite(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		ReportDAO dao = new ReportDAO();
+		String keyword = request.getParameter("keyword");
+		if(keyword != null) {
+			List<Report> listreport = dao.findfavorite(keyword);
+				if(listreport != null) {
+					request.setAttribute("title", keyword);
+					request.setAttribute("listreport", listreport);
+				}
+		}
+		request.setAttribute("views", "RpFavorites.jsp");	
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	protected void listfavoriteUser(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		ReportDAO dao = new ReportDAO();	
+		List<Report2> listreport = dao.favoritesuser();
+		if(listreport != null) {
+			request.setAttribute("listreport2", listreport);
+		}else {
+			request.setAttribute("message", "List Favorite User Not Empty");
+		}
+		request.setAttribute("views", "RpFvUser.jsp");	
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	protected void findlistfavoriteuser(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		ReportDAO dao = new ReportDAO();
+		String keyword = request.getParameter("keyword");
+		if(keyword != null) {
+			List<Report2> listreport = dao.findfavoriteUser(keyword);
+				if(listreport != null) {
+					request.setAttribute("title", keyword);
+					request.setAttribute("listreport2", listreport);
+				}
+		}
+		request.setAttribute("views", "RpFvUser.jsp");	
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	protected void listshare(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		ReportDAO dao = new ReportDAO();	
+		List<Report3> listreport = dao.listShare();
+		if(listreport != null) {
+			request.setAttribute("listreport3", listreport);
+		}else {
+			request.setAttribute("message", "List Shared Not Empty");
+		}
+		request.setAttribute("views", "RpShared.jsp");	
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	protected void findlistshared(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		ReportDAO dao = new ReportDAO();
+		String keyword = request.getParameter("keyword");
+		if(keyword != null) {
+			List<Report3> listreport = dao.findShared(keyword);
+				if(listreport != null) {
+					request.setAttribute("title", keyword);
+					request.setAttribute("listreport3", listreport);
+				}
+		}
+		request.setAttribute("views", "RpShared.jsp");	
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
 }

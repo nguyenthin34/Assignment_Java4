@@ -5,6 +5,11 @@
 	<class>com.poly.entity.Shared</class>
 	<class>com.poly.entity.User</class>
 	<class>com.poly.entity.Video</class>
+	<class>com.poly.entity.Report</class>
+	<class>com.poly.entity.Report2</class>
+	<class>com.poly.entity.Report3</class>
+	<class>com.poly.entity.TopLike</class>
+	<class>com.poly.entity.TopShare</class>
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/FPTU_POLYOE"/>
 			<property name="javax.persistence.jdbc.user" value="root"/>

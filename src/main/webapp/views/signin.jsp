@@ -32,7 +32,6 @@
                 <div class="col-md-9 col-lg-8 mx-auto">
                   <h3 class="login-heading mb-4">Welcome back!</h3>
                   <!-- Sign In Form -->
-                  <h3>${message }</h3>
                   <form action="${url }/signin" method="post">
                     <div class="form-floating mb-3">
                       <input
@@ -42,6 +41,7 @@
                         placeholder="name@example.com"
                         name="userid"
                         value="${userid}"
+                        required
                       />
                       <label for="floatingInput">Your UserName</label>
                     </div>
@@ -53,6 +53,7 @@
                         placeholder="Password"
                         name="passwords"
                         value=""
+                        required
                       />
                       <label for="floatingPassword">Password</label>
                     </div>
@@ -83,7 +84,11 @@
         </div>
       </div>
     </div>
-
+	 <c:if test="${message != null }">
+  	 <jsp:include page="/admin/toasts.jsp">
+   	<jsp:param value="${message }" name="message"/>
+  	 </jsp:include>
+  	</c:if>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"

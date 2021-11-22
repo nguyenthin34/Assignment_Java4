@@ -21,7 +21,6 @@ public class Video implements Serializable {
 
 	private String title;
 
-
 	private int views;
 
 

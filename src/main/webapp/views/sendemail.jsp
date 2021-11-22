@@ -20,7 +20,7 @@
       <p class="subscribe__copy">
        		http://localhost:8080/Assigment/UserServlet/details?VideoID=<span>${videoid }</span>
       </p>
-      <form action="${url }/share?VideoID=${videoid}" method="post">
+      <form action="${url }" method="post">
       	<div class="form">
         <input
           type="email"
@@ -28,7 +28,7 @@
           placeholder="Enter your email address"
           name = "to"
         />
-        <a href="${url }/share?VideoID=${videoid}"><button class="form__button">Send</button></a>
+       <button class="form__button" formaction="${url }/share?VideoID=${videoid}">Send</button>
       </div>
       	</form>
       <!-- <div class="notice">

@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.beanutils.BeanUtils;
 
 import com.poly.dao.FavoriteDAO;
+import com.poly.dao.ReportDAO;
 import com.poly.dao.SharedDAO;
 import com.poly.dao.UserDAO;
 import com.poly.dao.VideoDAO;
@@ -40,17 +41,13 @@ import com.poly.helper.XScope;
 @WebServlet({"/UserServlet","/UserServlet/list", "/UserServlet/register", "/UserServlet/signin","/UserServlet/details", 
 	"/UserServlet/likevd", "/UserServlet/move/*", "/UserServlet/myfavorite", "/UserServlet/unlike", "/UserServlet/sendemail"
 	, "/UserServlet/share", "/UserServlet/forgot", "/UserServlet/change", "/UserServlet/profile"
-	, "/UserServlet/updateprofile", "/UserServlet/logoff"})
+	, "/UserServlet/updateprofile", "/UserServlet/logoff", "/UserServlet/findtitle"})
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unused")
-	int page;
-	@Override
-	public void init() throws ServletException {
-		page = 0;
-	}
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String uri = request.getRequestURI();
+		selectTop5(request, response);
 		UserDAO daou = new UserDAO();
 		VideoDAO dao = new VideoDAO();
 		XScope.setSession(request, "count", 1);
@@ -81,6 +78,7 @@ public class UserServlet extends HttpServlet {
 			checkUser(request, response);
 		}else if(uri.contains("details")) {
 			XScope.setApplication(request, "linklike", uri);
+			increaseviews(request, response);
 			request.setAttribute("views", "details.jsp");
 			VideoDetails(request, response);
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
@@ -89,7 +87,7 @@ public class UserServlet extends HttpServlet {
 			MyFavorite(request, response);
 		}else if(uri.contains("move")) {
 			findAllVideoNext(request, response);
-			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+			
 		}else if(uri.contains("unlike")) {
 				try {
 					unLikeVideo(request, response);
@@ -114,15 +112,20 @@ public class UserServlet extends HttpServlet {
 		    request.setAttribute("videoid", videoid);
 			request.setAttribute("views", "sendemail.jsp");
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+		}else if(uri.contains("findtitle")){
+			findByVideoTitle(request, response);
 		}else {
 			findAllVideo(request, response);
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 		}
+		
 }
 
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+			throws ServletException, IOException {
 		String uri = request.getRequestURI();
+		selectTop5(request, response);
 		if(uri.contains("register")) {
 			Registeruser(request, response);
 		}else if(uri.contains("signin")) {
@@ -160,17 +163,16 @@ public class UserServlet extends HttpServlet {
 					if(remember != null) {
 						CookieUtils.add("UserID", username, 30*24, response);
 					}
-					request.setAttribute("message", "Thành Công");
 					ServletContext application = request.getServletContext();
 					application.setAttribute("user", user);
 				}else{
-					request.setAttribute("message", "Sai Mật Khẩu");
+					request.setAttribute("message", "Password is not exists!!!");
 					request.setAttribute("views", "signin.jsp");
 					request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 					return;
 				}
 			}else{
-				request.setAttribute("message", "Sai Tài Khoản");
+				request.setAttribute("message", "Account is not exists!!!");
 				request.setAttribute("views", "signin.jsp");
 				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 				return;
@@ -179,41 +181,39 @@ public class UserServlet extends HttpServlet {
 			findVideoNotLike(request, response);
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 		} catch (Exception e) {
+			request.setAttribute("message", "Account is not exists!!!");
+			request.setAttribute("views", "signin.jsp");
+			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			e.printStackTrace();
 		}
-	}
-	protected void findAllUser(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		try {
-
-			UserDAO dao = new UserDAO();
-			List<User> list = dao.findAll();
-			request.setAttribute("users", list);
-		} catch (Exception e) {
-			e.printStackTrace();
-			request.setAttribute("error", e.getMessage());
-		}
-		
 	}
 	protected void findAllVideo(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			VideoDAO dao = new VideoDAO();
 			List<Video> list = dao.findpage();
-			request.setAttribute("video", list);
+			if(list == null) {
+				request.setAttribute("message", "No videos yet!");
+			}else {
+				request.setAttribute("video", list);
+			}
+			
 			request.setAttribute("views", "article.jsp");
-
 	}
 	protected void findVideoNotLike(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			VideoDAO dao = new VideoDAO();
 			String userid = XScope.getApplication("username", request).toString();
 			List<Video> list = dao.findnotexists(0, userid);
-			request.setAttribute("video", list);
+			if(list == null) {
+				request.setAttribute("message", "No videos yet!");
+			}else {
+				request.setAttribute("video", list);
+			}
+			request.setAttribute("views", "article.jsp");
 	}
 	
 	protected void likeVideo(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		Date date = new Date();
 		UserDAO daou = new UserDAO();
 		VideoDAO daov = new VideoDAO();
@@ -221,24 +221,17 @@ public class UserServlet extends HttpServlet {
 		String videoid = request.getParameter("VideoID");
 		User user = daou.findByID(userid);
 		Video video = daov.findByID(videoid);
-		Favorite favorite = new Favorite(date, user, video);
 		FavoriteDAO daof = new FavoriteDAO();
-		daof.insert(favorite);
-		Object uri = XScope.getApplication("linklike", request);
-		if(uri != null) {
-			String ur = uri.toString();
-			if(ur.contains("details")) {
-				VideoDetails(request, response);
-				request.setAttribute("views", "details.jsp");
-			}else if(ur.contains("list")){
-				findVideoNotLike(request, response);
-				request.setAttribute("views", "article.jsp");
-			}
+		Favorite fv = daof.findLikeVideo(videoid, userid);
+		if(fv != null) {
+			request.setAttribute("message", "You already liked this song!");
 		}else {
-			findVideoNotLike(request, response);
-			request.setAttribute("views", "article.jsp");
+			Favorite favorite = new Favorite(date, user, video);
+			daof.insert(favorite);
+			request.setAttribute("message", "Thank you for liking the song!");
 		}
-		
+		findVideoNotLike(request, response);
+		request.setAttribute("views", "article.jsp");
 		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 	}
 	protected void unLikeVideo(HttpServletRequest request, HttpServletResponse response)
@@ -247,22 +240,15 @@ public class UserServlet extends HttpServlet {
 		String videoid = request.getParameter("VideoID");
 		FavoriteDAO daof = new FavoriteDAO();
 		Favorite dfv = daof.findLikeVideo(videoid, userid);
-		daof.delete(dfv.getId());
-		Object uri = XScope.getApplication("linklike", request);
-		if(uri != null) {
-			String ur = uri.toString();
-		if(ur.contains("details")) {
-			VideoDetails(request, response);
-			request.setAttribute("views", "details.jsp");
-			
-		}else if(ur.contains("myfavorite")){
-			MyFavorite(request, response);
-		}
+		if(dfv == null) {
+			request.setAttribute("message", "You already Unliked this song!");
 		}else {
-			request.setAttribute("views", "article.jsp");
+			daof.delete(dfv.getId());
+			findVideoNotLike(request, response);
+			request.setAttribute("message", "You already liked this song!");
 		}
+		request.setAttribute("views", "article.jsp");
 		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
-		
 	}
 	protected void VideoDetails(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -288,10 +274,14 @@ public class UserServlet extends HttpServlet {
 				list.add(vd);
 			}
 		}
-		if(userId != null){
+		UserDAO daou = new UserDAO();
+		User user = daou.findByID(userId);
+		
+		if(user != null){
 			Favorite fv = daof.findLikeVideoCookie(videoId, userId);
 			if(fv != null) {
 				request.setAttribute("chk", true);
+				request.setAttribute("user", user);
 			}
 		}
 		HttpSession session2 = request.getSession();
@@ -300,117 +290,168 @@ public class UserServlet extends HttpServlet {
 	}
 	protected void findAllVideoNext(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		request.setCharacterEncoding("utf-8");
-		String uri = request.getRequestURI();
+				request.setCharacterEncoding("utf-8");
+				String uri = request.getRequestURI();
 				VideoDAO dao = new VideoDAO();
-				List<Video> lst = dao.findAll();			
-				
-				int maxpage = (int) (dao.countvideo()/6);
-				List<Video> list = null;
-					if(uri.contains("next")) {
-						if(page <= maxpage) {
-							list = dao.findpage(page);
-							page++;
-							
-							request.setAttribute("index", page);
+				ArrayList<Video> nolst =  dao.findAll();
+				int maxpage = nolst.size() / 6;
+				int prd = nolst.size() % 6;
+				List<Video> list = new ArrayList<>();
+				String islogin = request.getParameter("islogin");
+				String id = request.getParameter("VideoID");
+				if(uri.contains("next")) {
+					if(!id.equals("") && islogin.equals("no")) {
+						int index = 0;
+						for(Video x : nolst) {
+							if(x.getId().equalsIgnoreCase(id)) {
+								index =  nolst.indexOf(x);
+							};
 						}
-						
-					}else if(uri.contains("prev")) {
-						if(page >= 0) {
-							list = dao.findpage(page);
-							page--;
-							request.setAttribute("index", page);
+						if(index + 1  < nolst.size()) {
+							list = dao.findpage(index + 1, 6);
+							request.setAttribute("video", list);
+						}else if(index + 1 == maxpage*6) {
+							list = dao.findpage(index + 1, prd);
+							request.setAttribute("video", list);
 						}else {
-							page = maxpage;
-							list = dao.findpage(page);
-							request.setAttribute("index", page - 1);
+							list =  dao.findpage(0, 6);
+							request.setAttribute("video", list);
 						}
+						request.setAttribute("views", "article.jsp");
+						request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+					}else if(!id.equals("") && islogin.equals("yes")) {
+						String id2 = request.getParameter("VideoID");
+						String userid = XScope.getApplication("username", request).toString();
+						ArrayList<Video> yeslst = dao.findallnotexists(userid);
+						int maxpage2 = yeslst.size() / 6;
+						int prd2 = yeslst.size() % 6;
+						int index = 0;
+						for(Video x : yeslst) {
+							if(x.getId().equals(id2)) {
+								index =  yeslst.indexOf(x);
+							};
+						}
+						if(index + 1  < yeslst.size()) {
+							list = dao.findpageallnotexists(userid, index + 1, 6);
+							request.setAttribute("video", list);
+						}else if(index + 1 == maxpage2 * 6) {
+							list = dao.findpageallnotexists(userid, index + 1, prd2);
+							request.setAttribute("video", list);
+						}else {
+							list =  dao.findpageallnotexists(userid, 0, 6);
+							request.setAttribute("video", list);
+						}
+						request.setAttribute("views", "article.jsp");
+						request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 					}
-				request.setAttribute("video", list);
+				}else if(uri.contains("prev")) {
+					if(!id.equals("") && islogin.equals("no")) {
+						int index = 0;
+						for(Video x : nolst) {
+							if(x.getId().equalsIgnoreCase(id)) {
+								index =  nolst.indexOf(x);
+							};
+						}
+						if(index - 6  >= 0) {
+							list = dao.findpage(index - 6, 6);
+							request.setAttribute("video", list);
+						}else if(index - 6 < 0) {
+							list = dao.findpage(nolst.size() - prd , prd);
+							request.setAttribute("video", list);
+						}else {
+							list =  dao.findpage(0, 6);
+							request.setAttribute("video", list);	
+						}
+					request.setAttribute("views", "article.jsp");
+					request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+					}else if(!id.equals("") && islogin.equals("yes")) {
+				String id2 = request.getParameter("VideoID");
+				String userid = XScope.getApplication("username", request).toString();
+				ArrayList<Video> yeslst = dao.findallnotexists(userid);
+				int prd2 = yeslst.size() % 6;
+				int index = 0;
+				for(Video x : yeslst) {
+					if(x.getId().equals(id2)) {
+						index =  yeslst.indexOf(x);
+					};
+				}
+				if(index - 6  >= 0) {
+					list = dao.findpageallnotexists(userid, index - 6, 6);
+					request.setAttribute("video", list);
+				}else if(index - 6 < 0) {
+					list = dao.findpageallnotexists(userid, yeslst.size() - prd2 , prd2);
+					request.setAttribute("video", list);
+				}else {
+					list =  dao.findpageallnotexists(userid, 0, 6);
+					request.setAttribute("video", list);
+				}
 				request.setAttribute("views", "article.jsp");
+				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+			}
+		}
 	}
-//	protected void findAllVideoPrev(HttpServletRequest request, HttpServletResponse response)
-//			throws ServletException, IOException {
-//		VideoDAO dao = new VideoDAO();
-//		Long maxvideo = dao.countvideo();
-//		int du = (int) (maxvideo % 6);
-//		int vitri = (int) (maxvideo - du);
-//		try {	
-//			int prev = Integer.valueOf(request.getParameter("page"));
-//			
-//			if(prev < 0) {
-//				request.setAttribute("index", vitri);
-//				List<Video> list = dao.findpage(vitri);
-//				request.setAttribute("video", list);		
-//			}else {
-//				List<Video> list = dao.findpage(prev);
-//				request.setAttribute("video", list);
-//				request.setAttribute("index", prev - 6 );
-//			}
-//					
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			request.setAttribute("error", e.getMessage());
-//		}
-//	}
-	
 	protected void MyFavorite(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		VideoDAO dao = new VideoDAO();
 		String userid = XScope.getApplication("username", request).toString();
 		List<Video> list = dao.findmyfavorite(userid);
-		request.setAttribute("video", list);
-		request.setAttribute("quantity", list.size());
+		if(list == null) {
+			request.setAttribute("message", "No favorites videos yet!");
+		}else {
+			request.setAttribute("video", list);
+			request.setAttribute("quantity", list.size());
+		}
 		request.setAttribute("views", "article.jsp");
 		request.setAttribute("article", true);
 		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 	}
-	
 	protected void sendemail(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			final String username = "nguyenthin34hd@gmail.com";
-			final String password = "thin280101";
-			String videoid = request.getParameter("VideoID");
-			VideoDAO daov = new VideoDAO();
-			Video video = daov.findByID(videoid);
-			UserDAO daou = new UserDAO();
-			String userid = XScope.getApplication("username", request).toString();
-			User user = daou.findByID(userid);
-			Date date = new Date();
-			Properties prop = new Properties();
-			prop.put("mail.smtp.host", "smtp.gmail.com");
-			prop.put("mail.smtp.port", "587");
-			prop.put("mail.smtp.auth", "true");
-			prop.put("mail.smtp.starttls.enable", "true");
-			Session session = Session.getInstance(prop, new Authenticator() {
-				protected PasswordAuthentication getPasswordAuthentication() {
-					return new PasswordAuthentication(username, password);
-				}
-			});
-			String emailTo = request.getParameter("to");
-			String emailSubject = "Video Remix: Share Video";
-			String emailContent = "http://localhost:8080/Assigment/UserServlet/details?VideoID=" + videoid;
+			final String password = "Thin280101";
 			try {
-				MimeMessage message = new MimeMessage(session);
-				message.setFrom(new InternetAddress(username));
-				message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailTo));
-				message.setSubject(emailSubject, "utf-8");
-				message.setText(emailContent, "utf-8", "html");
-				Transport.send(message);
-				System.out.println("Done");
+				String videoid = request.getParameter("VideoID");
+				VideoDAO daov = new VideoDAO();
+				Video video = daov.findByID(videoid);
+				UserDAO daou = new UserDAO();
+				String userid = XScope.getApplication("username", request).toString();
+				User user = daou.findByID(userid);
+				Date date = new Date();
+				Properties prop = new Properties();
+				prop.put("mail.smtp.host", "smtp.gmail.com");
+				prop.put("mail.smtp.port", "587");
+				prop.put("mail.smtp.auth", "true");
+				prop.put("mail.smtp.starttls.enable", "true");
+				Session session = Session.getInstance(prop, new Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(username, password);
+					}
+				});
+				String emailTo = request.getParameter("to");
+				String emailSubject = "Video Remix: Share Video";
+				String emailContent = "http://localhost:8080/Assigment/UserServlet/details?VideoID=" + videoid;
+					MimeMessage message = new MimeMessage(session);
+					message.setFrom(new InternetAddress(username));
+					message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailTo));
+					message.setSubject(emailSubject, "utf-8");
+					message.setText(emailContent, "utf-8", "html");
+					Transport.send(message);
+				Shared shared = new Shared();
+				shared.setEmail(emailTo);
+				shared.setSharedDate(date);
+				shared.setUser(user);
+				shared.setVideo(video);
+				SharedDAO daos = new SharedDAO();
+				daos.insert(shared);
+				findVideoNotLike(request, response);
+				request.setAttribute("views", "article.jsp");
+				request.setAttribute("message", "Send Email Success!");
+				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			} catch (Exception e) {
 				e.printStackTrace();
+				request.setAttribute("message", "Error!");
 			}
-			Shared shared = new Shared();
-			shared.setEmail(emailTo);
-			shared.setSharedDate(date);
-			shared.setUser(user);
-			shared.setVideo(video);
-			SharedDAO daos = new SharedDAO();
-			daos.insert(shared);
-			findVideoNotLike(request, response);
-			request.setAttribute("views", "article.jsp");
-			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+		
 		}
 	protected void EmailForgotPass(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -449,7 +490,7 @@ public class UserServlet extends HttpServlet {
 				request.setAttribute("views", "forgotpassword.jsp");
 				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			}else {
-				request.setAttribute("message", "Invalid information");
+				request.setAttribute("message", "Invalid information!!!");
 				request.setAttribute("views", "forgotpassword.jsp");
 				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			}
@@ -462,16 +503,14 @@ public class UserServlet extends HttpServlet {
 			User cuser = dao.findByPass(username, pass);
 			if(cuser == null) {
 				request.setAttribute("message", "Incorrect Account or Password");
-				request.setAttribute("views", "changepass.jsp");
-				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			}else {
 				String newpass = request.getParameter("confirmPassword");
 				cuser.setPasswords(newpass);
 				dao.update(cuser);
 				request.setAttribute("message", "Change Password Success");
-				request.setAttribute("views", "changepass.jsp");
-				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			}
+			request.setAttribute("views", "changepass.jsp");
+			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 	}
 	@SuppressWarnings("unused")
 	protected void Registeruser(HttpServletRequest request, HttpServletResponse response)
@@ -489,21 +528,18 @@ public class UserServlet extends HttpServlet {
 					dao.insert(user);
 					Mail(request, response, user);
 					request.setAttribute("message", "Register Success!!!");
-					request.setAttribute("views", "register.jsp");
-					request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 				}else {
-					request.setAttribute("message", "username already exists!!!");
-					request.setAttribute("views", "register.jsp");
-					request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+					request.setAttribute("message", "Username already exists!!!");
 				}	
 			}else {
 				request.setAttribute("message", "Register unsuccessful!!!");
-				request.setAttribute("views", "register.jsp");
-				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
-			}	
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			request.setAttribute("message", "Register unsuccessful!!!");
 		}
+		request.setAttribute("views", "register.jsp");
+		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 	}
 	protected void Mail(HttpServletRequest request, HttpServletResponse response, User user)
 			throws ServletException, IOException{
@@ -531,9 +567,10 @@ public class UserServlet extends HttpServlet {
 				message.setSubject(emailSubject, "utf-8");
 				message.setText(emailContent, "utf-8", "html");
 				Transport.send(message);
-				System.out.println("Done");
+				request.setAttribute("message", "Send Mail Success!");
 			} catch (Exception e) {
 				e.printStackTrace();
+				request.setAttribute("message", "Send Mail Failed!");
 			}
 		
 	}
@@ -555,18 +592,66 @@ public class UserServlet extends HttpServlet {
 				request.setAttribute("message", "Udpate Success!!!");
 				request.setAttribute("email", user.getEmail());
 				request.setAttribute("fullname", user.getFullname());
-				request.setAttribute("views", "infomation.jsp");
-				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			}else {
 				request.setAttribute("message", "Udpate Failed!!!");
-				request.setAttribute("views", "infomation.jsp");
-				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 			}
 		} catch (Exception e) {
 			request.setAttribute("message", "Udpate Failed!!!");
-			request.setAttribute("views", "infomation.jsp");
-			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+			e.printStackTrace();
+		}
+		request.setAttribute("views", "infomation.jsp");
+		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+	}
+	protected void findByVideoTitle(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException{
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		String title = request.getParameter("title");
+		VideoDAO dao = new VideoDAO();
+		List<Video> listttvideo = new ArrayList<Video>();
+			listttvideo = dao.findbyVideoTitle(title);
+			if(listttvideo != null) {
+				request.setAttribute("video", listttvideo);
+			}else {
+		request.setAttribute("message", "There is no video you are looking for!!!");
+			}
+		request.setAttribute("views", "article.jsp");
+		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+	}
+	protected void selectTop5(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException{
+		try {
+			VideoDAO dao = new VideoDAO();
+			ReportDAO daor = new ReportDAO();
+			List<Video> topview = dao.topview();
+			List<TopLike> toplike = daor.toplike();
+			List<TopShare> topshare = daor.topshare();
+			if(topview != null) {
+				request.setAttribute("topview", topview);
+			}
+			if(toplike != null) {
+				request.setAttribute("toplike", toplike);
+			}
+			if(topshare != null) {
+				request.setAttribute("topshare", topshare);
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	protected void increaseviews(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException{
+			try {
+				String videoid = request.getParameter("VideoID");
+				VideoDAO dao = new VideoDAO();
+				Video cvideo = dao.findByID(videoid);
+				if(cvideo != null) {
+					cvideo.setViews(cvideo.getViews() + 1);
+					dao.update(cvideo);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	}
+	
 }

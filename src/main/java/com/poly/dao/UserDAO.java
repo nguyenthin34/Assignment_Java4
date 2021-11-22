@@ -67,17 +67,25 @@ public class UserDAO{
 	}
 
 	public User findByID(String userID) {
-		EntityManager em = JpaUtils.getEntityManager();
-		User user = em.find(User.class, userID);
-		return user == null ? null : user;
+		try {
+			EntityManager em = JpaUtils.getEntityManager();
+			User user = em.find(User.class, userID);
+			return user;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public List<User> findAll() {
-		EntityManager em = JpaUtils.getEntityManager();
-
-		TypedQuery<User> query = em.createNamedQuery("User.findAll", User.class);
-		return query.getResultList();
-
+		try {
+			EntityManager em = JpaUtils.getEntityManager();
+			TypedQuery<User> query = em.createNamedQuery("User.findAll", User.class);
+			return query.getResultList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	public User checklogin(String id, String password) {
 		try {
@@ -97,12 +105,17 @@ public class UserDAO{
 	}
 	
 	public User findByEmail(String userID, String email) {
-		EntityManager em = JpaUtils.getEntityManager();
-		String jpql = "SELECT u FROM User u WHERE u.id =:id AND u.email =:email";
-		TypedQuery<User> query = em.createQuery(jpql, User.class);
-		query.setParameter("id", userID);
-		query.setParameter("email", email);
-		return query.getSingleResult() == null ? null : query.getSingleResult();
+		try {
+			EntityManager em = JpaUtils.getEntityManager();
+			String jpql = "SELECT u FROM User u WHERE u.id =:id AND u.email =:email";
+			TypedQuery<User> query = em.createQuery(jpql, User.class);
+			query.setParameter("id", userID);
+			query.setParameter("email", email);
+			return query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public User findByPass(String userID, String pass) {
@@ -118,4 +131,6 @@ public class UserDAO{
 		}
 	return null;
 	}
+	
+
 }

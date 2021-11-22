@@ -41,6 +41,11 @@
       </li>
     </ul>
     </c:forEach>
+    <c:if test="${message != null }">
+  	 <jsp:include page="/admin/toasts.jsp">
+   	<jsp:param value="${message }" name="message"/>
+  	 </jsp:include>
+  	</c:if>
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
       integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"

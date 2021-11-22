@@ -114,18 +114,15 @@
                 <div class="header_search">
                   <div class="header_search_content">
                     <div class="header_search_form_container">
-                      <form action="#" class="header_search_form clearfix">
+                      <form action="${url }" class="header_search_form clearfix" method="get">
                         <input
                           type="search"
                           required="required"
                           class="header_search_input"
                           placeholder="Search for products..."
+                          name="title"
                         />
-                        <button
-                          type="submit"
-                          class="header_search_button trans_300"
-                          value="Submit"
-                        >
+                        <button class="header_search_button trans_300" formaction="${url }/findtitle">
                           <img
                             src="https://res.cloudinary.com/dxfq3iotg/image/upload/v1560918770/search.png"
                             alt=""
@@ -210,13 +207,17 @@
         </div>
     </header>
     <div>	
-			<article>
+			<article >
 				<jsp:include page="${views}">
 					<jsp:param value="${video }" name="video"/>
-					<jsp:param value="${index }" name="index"/>
 					<jsp:param value="${list }" name="list"/>
+					<jsp:param value="${message }" name="message"/>
+					<jsp:param value="${topview }" name="topview"/>
+					<jsp:param value="${toplike }" name="toplike"/>
+					<jsp:param value="${topshare }" name="topshare"/>
 				</jsp:include>
 			</article>
+			
 		</div>
       <footer>
       	<jsp:include page="footer.jsp"></jsp:include>

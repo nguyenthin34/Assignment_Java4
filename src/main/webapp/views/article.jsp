@@ -18,7 +18,8 @@
 <body>
 <c:url var="url" value="/UserServlet"></c:url>
 	<div>
-	<h1>${index }</h1>
+	<div>
+	</div>
       <section class="row">
         <!-- card -->
         <div class="col-9">
@@ -29,7 +30,7 @@
              		<div class="card text-center">
                 	<div class="card-body">
                   		<a href="${url }/details?VideoID=${item.id}">
-                  		<img src="/Assigment/images/${item.poster }" alt="ahihi" width="90%" class="fluid"/></a>
+                  		<img src="${pageContext.request.contextPath}/images/${item.poster }" alt="ahihi" width="90%" class="fluid"/></a>
                  	 <div class="row border-top mt-2">
                    		 <b>${item.title }</b>
                  	 </div>
@@ -63,16 +64,28 @@
      				<c:when test="${article }"></c:when>
      				<c:otherwise>
      					<jsp:include page="pagination.jsp">
-             				<jsp:param value="${index }" name="index"/>
+             				<jsp:param value="${video }" name="video"/>
+             				<jsp:param value="${user }" name="user"/>
              			</jsp:include>
      				</c:otherwise>
      			</c:choose>
              
 		</div>   
         </div>
+        <div class="col-3">
+        		<jsp:include page="aside.jsp">
+        			<jsp:param value="${topview }" name="topview"/>
+        			<jsp:param value="${toplike }" name="toplike"/>
+        			<jsp:param value="${topshare }" name="topshare"/>
+        		</jsp:include>
+        </div>
       </section>
     </div>
-
+	<c:if test="${message != null }">
+  	 <jsp:include page="/admin/toasts.jsp">
+   	<jsp:param value="${message }" name="message"/>
+  	 </jsp:include>
+  	</c:if>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"

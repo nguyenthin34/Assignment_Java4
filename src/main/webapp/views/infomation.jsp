@@ -30,7 +30,7 @@
       <div class="container">
         <div class="text-center mt-5">
           <h1>Infomation User</h1>
-          <h3>${message }</h3>
+        
         </div>
         <div class="row">
           <div class="col-lg-7 mx-auto">
@@ -121,6 +121,11 @@
           <!-- /.row-->
         </div>
       </div>
+      <c:if test="${message != null }">
+  	 <jsp:include page="/admin/toasts.jsp">
+   	<jsp:param value="${message }" name="message"/>
+  	 </jsp:include>
+  	</c:if>
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
     </div>
   </body>

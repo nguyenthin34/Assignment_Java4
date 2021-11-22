@@ -49,35 +49,19 @@
                     />
                   </div>
                   <a href="mailto:fastsales@gmail.com"
-                    >nguyenthin34hd@gmail.com</a
-                  >
+                    >nguyenthin34hd@gmail.com</a >
                 </div>
-                <div class="top_bar_content ml-auto">
-                  <div class="top_bar_menu">
-                    <ul class="standard_dropdown top_bar_dropdown">
-                      <li>
-                        <a href="#"
-                          >English<i class="fas fa-chevron-down"></i
-                        ></a>
-                      </li>
-                      <li>
-                        <a href="#"
-                          >Vietnamese<i class="fas fa-chevron-down"></i
-                        ></a>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="top_bar_user">
+                 <div class="top_bar_user">
                     <div class="user_icon">
                       <img
                         src="https://res.cloudinary.com/dxfq3iotg/image/upload/v1560918647/user.svg"
                         alt=""
                       />
                     </div>
-                    <div><a href="#">Register</a></div>
-                    <div><a href="#">Sign in</a></div>
+                    	<c:if test="${!empty user }">
+                    	<div><a href="${ url}/signout">Sign Out</a></div>
+                    	</c:if>  
                   </div>
-                </div>
               </div>
             </div>
           </div>
@@ -85,18 +69,15 @@
         <!-- Header Main -->
         <div class="header_main">
           <div class="container">
-            <div class="row">
               <!-- Logo -->
-              <div class="col-lg-2 col-sm-3 col-3 order-1">
                 <div class="logo_container">
-                  <div class="logo"><a href="#">BBB</a></div>
-                </div>
+                  <div class="logo"><a href="${url }/home">Admin Music Remix</a></div>
               </div>
-            </div>
           </div>
         </div>
         <!-- Main Navigation -->
-        <nav class="main_nav">
+        <c:if test="${!empty user }">
+        	<nav class="main_nav">
           <div class="container">
             <div class="row">
               <div class="col">
@@ -106,34 +87,51 @@
                   <div class="main_nav_menu">
                     <ul class="standard_dropdown main_nav_dropdown">
                       <li>
-                        <a href="#">Home<i class="fas fa-chevron-down"></i></a>
+                        <a href="${url }/home">Home<i class="bi bi-chevron-down"></i></a>
                       </li>
                       <li class="hassubs">
-                        <a href="#">Laptop<i class="bi bi-chevron-down"></i></a>
+                        <a href="">Video<i class="bi bi-chevron-down"></i></a>
                         <ul>
                           <li>
-                            <a href="${url }/editvideo"
-                              >Video Edition<i class="fas fa-chevron-down"></i
-                            ></a>
+                            <a href="${url }/editvideo">Video Edition</a>
                           </li>
                           <li>
-                            <a href="${url }/listvideo"
-                              >Video List<i class="fas fa-chevron-down"></i
+                            <a href="${url }/listvideo">Video List<i class="bi bi-camera-reels-fill"></i
                             ></a>
                           </li>
                         </ul>
                       </li>
                       <li class="hassubs">
-                        <a href="#">Users<i class="bi bi-chevron-down"></i></a>
+                        <a href="">Users<i class="bi bi-chevron-down"></i></a>
                         <ul>
                           <li>
-                            <a href="#"
+                            <a href="${url }/edituser"
                               >User Edition<i class="fas fa-chevron-down"></i
                             ></a>
                           </li>
                           <li>
-                            <a href="#"
+                            <a href="${url }/listuser"
                               >User List<i class="fas fa-chevron-down"></i
+                            ></a>
+                          </li>
+                        </ul>
+                      </li>
+                      <li class="hassubs">
+                        <a href="">Report<i class="bi bi-chevron-down"></i></a>
+                        <ul>
+                          <li>
+                            <a href="${url }/favorites"
+                              >Favorites<i class="fas fa-chevron-down"></i
+                            ></a>
+                          </li>
+                          <li>
+                            <a href="${url }/favoritesuser"
+                              >Favorite User<i class="fas fa-chevron-down"></i
+                            ></a>
+                          </li>
+                          <li>
+                            <a href="${url }/shared"
+                              >Shared Friends<i class="fas fa-chevron-down"></i
                             ></a>
                           </li>
                         </ul>
@@ -174,6 +172,7 @@
             </div>
           </div>
         </nav>
+        </c:if>
         <!-- Menu -->
         <div class="page_menu">
           <div class="container">
@@ -199,14 +198,24 @@
      		 <article>
 				<jsp:include page="${views }">
 					<jsp:param value="${listvideo }" name="listvideo"/>
-					<jsp:param value="${video }" name="listvideo"/>
+					<jsp:param value="${listuser }" name="listuser"/>
+					<jsp:param value="${video }" name="video"/>
+					<jsp:param value="${user }" name="user"/>
+					<jsp:param value="${videore }" name="video"/>
+						<jsp:param value="${listreport }" name="listreport"/>
+						<jsp:param value="${listreport2 }" name="listreport2"/>
+						<jsp:param value="${listreport3 }" name="listreport3"/>
 				</jsp:include>
 			</article>
 			<footer>
 				<jsp:include page="footer.jsp"></jsp:include>
 			</footer>
     </div>
-   
+   <c:if test="${message != null }">
+  	 <jsp:include page="toasts.jsp">
+   <jsp:param value="${message }" name="message"/>
+   </jsp:include>
+   </c:if>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"

@@ -16,10 +16,20 @@
 <c:url var="url" value="/UserServlet/move"></c:url>
 		<div class="pagination_container">
       <ul class="pagi">
-        <li><a href="#">First</a></li>
-        <li><a href="${url }/prev">Prev</a></li>
-        <li><a href="${url }/next">Next</a></li>	
-        <li><a href="#">Last</a></li>
+       <c:choose>
+       		<c:when test="${empty user }">
+       			 <li><a href="#">First</a></li>
+        		 <li><a href="${url }/prev?islogin=no&VideoID=${video.get(0).id == null? '' :  video.get(0).id}">Prev</a></li>
+       			 <li><a href="${url }/next?islogin=no&VideoID=${video.get((video.size() - 1)).id == null? '' :  video.get((video.size() - 1)).id}">Next</a></li>	
+        		 <li><a href="#">Last</a></li>
+       		</c:when>
+       		<c:otherwise>
+       			 <li><a href="#">First</a></li>
+       			 <li><a href="${url }/prev?islogin=yes&VideoID=${video.get(0).id == null? '' :  video.get(0).id}">Prev</a></li>
+        		 <li><a href="${url }/next?islogin=yes&VideoID=${video.get((video.size() - 1)).id == null? '' :  video.get((video.size() - 1)).id}">Next</a></li>	
+       			 <li><a href="#">Last</a></li>
+       		</c:otherwise>
+       </c:choose>
       </ul>
     </div>
 </body>

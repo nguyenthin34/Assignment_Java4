@@ -33,9 +33,6 @@
               <h5 class="card-title text-center mb-5 fw-light fs-5">
                 Register
               </h5>
-              <h6 class="card-title text-center mb-5 fw-light fs-5">
-                ${message }
-              </h6>
               <form action="${url }/register" method="post">
                 <div class="form-floating mb-3">
                   <input
@@ -46,8 +43,8 @@
                     name="id"
                     required
                     autofocus
-                    maxlength="10"
-                    pattern="[a-zA-Z0-9]{6,10}"
+                    maxlength="20"
+                    pattern="[a-zA-Z0-9]{6,20}"
               		title="Invalid character and from 6 to 10 characters"
                   />
                   <label for="floatingInputUsername">Username</label>
@@ -62,8 +59,6 @@
                     required
                     autofocus
                     maxlength="50"
-                    pattern="[a-zA-Z0-9]{6,50}"
-              		title="Invalid character and from 6 to 50 characters"
                   />
                   <label for="floatingInputUsername">Fullname</label>
                 </div>
@@ -155,6 +150,11 @@
         </div>
       </div>
     </div>
+    <c:if test="${message != null }">
+  	 <jsp:include page="/admin/toasts.jsp">
+   	<jsp:param value="${message }" name="message"/>
+  	 </jsp:include>
+  	</c:if>
     <script type="text/javascript" src="${pageContext.request.contextPath}/views/js/register.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"

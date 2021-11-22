@@ -43,14 +43,24 @@
           <div class="row">
           	<div  class="product-price-btn">
           		<c:choose>
-          			<c:when test="${chk }">
-          				<a href="${url }/unlike?VideoID=${nameytb.id }"><button type="button" class="col-6">UnLike</button></a>
+          			<c:when test="${!empty user }">
+          				<c:choose>
+          					<c:when test="${chk }">
+          					<a href="${url }/unlike?VideoID=${nameytb.id }"><button type="button" class="col-6">UnLike</button></a>
+          					</c:when>
+          					<c:otherwise>
+          					<a href="${url }/likevd?VideoID=${nameytb.id }"><button type="button" class="col-6">Like</button></a>
+          					</c:otherwise>
+          					
+          				</c:choose>
+          				<a href="${url }/share?VideoID=${nameytb.id }"><button type="button" class="col-6">Share</button></a>
           			</c:when>
           			<c:otherwise>
-          				<a href="${url }/likevd?VideoID=${nameytb.id }"><button type="button" class="col-6">Like</button></a>
+          					<a href="${url }/signin"><button type="button" class="col-6">Like</button></a>
+          					<a href="${url }/signin"><button type="button" class="col-6">Share</button></a>
           			</c:otherwise>
           		</c:choose>
-            	<button type="button" class="col-6">Share</button>
+            
          	 </div>
           </div>
         </div>

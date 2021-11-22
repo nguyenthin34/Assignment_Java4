@@ -32,7 +32,7 @@
 			<div class="col-md-8 col-xs-12 col-sm-12 login_form ">
 				<div class="container-fluid">
 					<div class="row">
-						<h2>${message }</h2>
+						
 					</div>
 					<div class="row">
 						<form control="" class="form-group" action="${url }/forgot" method="post">
@@ -54,5 +54,10 @@
 			</div>
 		</div>
 	</div>
+	<c:if test="${message != null }">
+  	 <jsp:include page="/admin/toasts.jsp">
+   	<jsp:param value="${message }" name="message"/>
+  	 </jsp:include>
+  	</c:if>
   </body>
 </html>

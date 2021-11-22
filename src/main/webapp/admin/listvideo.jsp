@@ -26,6 +26,7 @@
         <th class="table-warning">Poster</th>
         <th class="table-info">Status</th>
         <th class="table-light"></th>
+        <th class="table-dark"></th>
       </tr>
       <c:forEach var="item" items="${listvideo }">
       	<tr>
@@ -36,8 +37,14 @@
         <td class="table-warning">${item.poster }</td>
         <td class="table-info">${item.actives ? 'Active' : 'Inactive'}</td>
         <td class="table-light"><a href="${url }/editvideo?VideoID=${item.id}">Edit</a></td>
+        <td class="table-dark"><a href="${url }/removevideo?VideoID=${item.id}">Delete</a></td>
       </tr>
       </c:forEach>
     </table>
+     <c:if test="${message != null }">
+  	 <jsp:include page="toasts.jsp">
+   <jsp:param value="${message }" name="message"/>
+   </jsp:include>
+  </c:if>
   </body>
 </html>
