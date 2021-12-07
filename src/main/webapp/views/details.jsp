@@ -46,10 +46,10 @@
           			<c:when test="${!empty user }">
           				<c:choose>
           					<c:when test="${chk }">
-          					<a href="${url }/unlike?VideoID=${nameytb.id }"><button type="button" class="col-6">UnLike</button></a>
+          					<a href="${url }/unlike?VideoID=${nameytb.id }&page=detials"><button type="button" class="col-6">UnLike</button></a>
           					</c:when>
           					<c:otherwise>
-          					<a href="${url }/likevd?VideoID=${nameytb.id }"><button type="button" class="col-6">Like</button></a>
+          					<a href="${url }/likevd?VideoID=${nameytb.id }&page=detials"><button type="button" class="col-6">Like</button></a>
           					</c:otherwise>
           					
           				</c:choose>

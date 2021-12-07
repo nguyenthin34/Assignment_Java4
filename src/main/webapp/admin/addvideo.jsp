@@ -25,23 +25,23 @@
      	 <div class="row">
         <div class="col-md-5 border-right">
           <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-          <div class="card-body">
-                <img id="poster" 
-              		src="${pageContext.request.contextPath}/images/${video.poster }" alt="No Image" width="90%" class="fluid" />
+             <div class="card-body">
+                  		<img id="poster" 
+                  		src="https://d29fhpw069ctt2.cloudfront.net/icon/image/38611/preview.svg" alt="ahihi" width="90%" class="fluid"/>
+                 	 <div class="row border-top mt-2">
+                 	 </div>
                 	</div>
        			 <div class="button-wrapper">
   				<span class="label">Upload File</span>
    				 <input type="file" name="photo_file" id="upload"
-   				  class="upload-box" placeholder="Upload File" onchange="showPoster()" />
+   				  class="upload-box" placeholder="Upload File"  onchange="showPoster()" required/>
 					</div>
-            <span class="font-weight-bold">${message }</span>
-            <span class="text-black-50">edogaru@mail.com.my</span><span> </span>
           </div>
         </div>
         <div class="col-md-7 border-right">
           <div class="p-3 py-5">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="text-right">Profile Settings</h4>
+              <h4 class="text-right">Video Settings</h4>
             </div>
             <div class="row mt-2">
               <div class="col-md-6">
@@ -77,8 +77,8 @@
                   class="form-control"
                   placeholder="enter view number"
                   name = "views"
-                  required
                   min="0"
+                  required
                    value="${video.views }"
                 />
               </div>
@@ -122,8 +122,8 @@
               </div>
             </div>
             <div class="mt-5 text-center">
-              <button class="btn btn-primary profile-button" formaction="${url }/updatevideo">
-                Update
+              <button class="btn btn-primary profile-button" formaction="${url }/insertvideo">
+                Save
               </button>
               <button class="btn btn-primary profile-button" formaction="${url }/resetvideo" >
                 Reset
@@ -134,7 +134,6 @@
       </div>
      </form>
     </div>
-    
       <c:if test="${message != null }">
   	 <jsp:include page="toasts.jsp">
    <jsp:param value="${message }" name="message"/>
@@ -160,4 +159,5 @@
  	}
   </script>
   </body>
+  
 </html>

@@ -1,13 +1,11 @@
 package com.poly.dao;
 
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
 import com.poly.entity.Favorite;
-import com.poly.entity.Video;
 
 public class FavoriteDAO {
 	public void insert(Favorite favorite) {

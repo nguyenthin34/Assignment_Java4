@@ -56,7 +56,7 @@ public class XScope {
 	*/
 	public static Object getSession(HttpServletRequest request, String name){
 		HttpSession session = request.getSession();
-		return session.getAttribute(name);
+		return session.getAttribute(name) == null ? null : session.getAttribute(name);
 	}
 	/**
 	* XĂ³a attribute trong session scope

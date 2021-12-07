@@ -96,6 +96,9 @@
                             <a href="${url }/editvideo">Video Edition</a>
                           </li>
                           <li>
+                            <a href="${url }/insertvideo">Insert Video</a>
+                          </li>
+                          <li>
                             <a href="${url }/listvideo">Video List<i class="bi bi-camera-reels-fill"></i
                             ></a>
                           </li>
@@ -107,6 +110,12 @@
                           <li>
                             <a href="${url }/edituser"
                               >User Edition<i class="fas fa-chevron-down"></i
+                            ></a>
+                          </li>
+                          
+                           <li>
+                            <a href="${url }/insertuser"
+                              >Add User<i class="fas fa-chevron-down"></i
                             ></a>
                           </li>
                           <li>
@@ -135,16 +144,6 @@
                             ></a>
                           </li>
                         </ul>
-                      </li>
-                      <li>
-                        <a href="blog.html"
-                          >Blog<i class="fas fa-chevron-down"></i
-                        ></a>
-                      </li>
-                      <li>
-                        <a href="contact.html"
-                          >Contact<i class="fas fa-chevron-down"></i
-                        ></a>
                       </li>
                     </ul>
                   </div>

@@ -40,10 +40,10 @@
                 		<c:when test="${!empty user }">
                 		<c:choose>
                 			<c:when test="${article }">
-                				<a href="${url }/unlike?VideoID=${item.id}" class="btn btn-success">UnLike</a>
+                				<a href="${url }/unlike?VideoID=${item.id}&page=article" class="btn btn-success">UnLike</a>
                 			</c:when>
                 			<c:otherwise>
-                				<a href="${url }/likevd?VideoID=${item.id}" class="btn btn-success">Like</a>
+                				<a href="${url }/likevd?VideoID=${item.id}&page=article" class="btn btn-success">Like</a>
                 			</c:otherwise>
                 		</c:choose>
                 			
@@ -86,6 +86,7 @@
    	<jsp:param value="${message }" name="message"/>
   	 </jsp:include>
   	</c:if>
+  	 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"

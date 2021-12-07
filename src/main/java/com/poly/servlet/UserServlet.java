@@ -41,7 +41,7 @@ import com.poly.helper.XScope;
 @WebServlet({"/UserServlet","/UserServlet/list", "/UserServlet/register", "/UserServlet/signin","/UserServlet/details", 
 	"/UserServlet/likevd", "/UserServlet/move/*", "/UserServlet/myfavorite", "/UserServlet/unlike", "/UserServlet/sendemail"
 	, "/UserServlet/share", "/UserServlet/forgot", "/UserServlet/change", "/UserServlet/profile"
-	, "/UserServlet/updateprofile", "/UserServlet/logoff", "/UserServlet/findtitle"})
+	, "/UserServlet/updateprofile", "/UserServlet/logoff", "/UserServlet/findtitle", "/UserServlet/home"})
 public class UserServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unused")
@@ -58,7 +58,7 @@ public class UserServlet extends HttpServlet {
 			request.setAttribute("views", "forgotpassword.jsp");
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 		}else if(uri.contains("profile")) {
-			String username = XScope.getApplication("username", request).toString();
+			String username = XScope.getSession( request, "username").toString();
 			User u  = daou.findByID(username);
 			request.setAttribute("email", u.getEmail());
 			request.setAttribute("fullname", u.getFullname());
@@ -68,37 +68,35 @@ public class UserServlet extends HttpServlet {
 			request.setAttribute("views", "changepass.jsp");
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 		}else if(uri.contains("logoff")) {
-			XScope.setApplication(request, "username", null);
-			ServletContext application = request.getServletContext();
-			application.setAttribute("user", null);
-			findAllVideo(request, response);
-			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+			XScope.setSession(request, "username", null);
+			XScope.setSession(request, "user", null);
+			response.sendRedirect(request.getContextPath() + "/UserServlet");
 		}else if(uri.contains("signin")) {
 			request.setAttribute("views", "signin.jsp");
 			checkUser(request, response);
 		}else if(uri.contains("details")) {
-			XScope.setApplication(request, "linklike", uri);
+			XScope.setSession(request, "linklike", uri);
 			increaseviews(request, response);
 			request.setAttribute("views", "details.jsp");
 			VideoDetails(request, response);
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 		}else if(uri.contains("myfavorite")) {
-			XScope.setApplication(request, "linklike", uri);
+			XScope.setSession(request, "linklike", uri);
 			MyFavorite(request, response);
 		}else if(uri.contains("move")) {
 			findAllVideoNext(request, response);
-			
+		}else if(uri.contains("home")) {
+			findVideoNotLike(request, response);
+			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 		}else if(uri.contains("unlike")) {
 				try {
 					unLikeVideo(request, response);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 		}else if(uri.contains("likevd")) {
 			likeVideo(request, response);
 		}else if(uri.contains("list")) {
-			XScope.setApplication(request, "linklike", uri);
 			findVideoNotLike(request, response);
 			request.setAttribute("views", "article.jsp");
 			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
@@ -159,12 +157,12 @@ public class UserServlet extends HttpServlet {
 		try {
 			if(user != null) {
 				if(user.getPasswords().equalsIgnoreCase(pass)) {
-					XScope.setApplication(request, "username", username);
+					XScope.setSession(request, "username", username);
 					if(remember != null) {
 						CookieUtils.add("UserID", username, 30*24, response);
 					}
-					ServletContext application = request.getServletContext();
-					application.setAttribute("user", user);
+					HttpSession session = request.getSession();
+					session.setAttribute("user", user);
 				}else{
 					request.setAttribute("message", "Password is not exists!!!");
 					request.setAttribute("views", "signin.jsp");
@@ -177,9 +175,10 @@ public class UserServlet extends HttpServlet {
 				request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 				return;
 			}
-			request.setAttribute("views", "article.jsp");
-			findVideoNotLike(request, response);
-			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+			
+//			request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+			request.setAttribute("message", "Login Success!!!");
+			response.sendRedirect( request.getContextPath() + "/UserServlet/home");
 		} catch (Exception e) {
 			request.setAttribute("message", "Account is not exists!!!");
 			request.setAttribute("views", "signin.jsp");
@@ -202,7 +201,7 @@ public class UserServlet extends HttpServlet {
 	protected void findVideoNotLike(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			VideoDAO dao = new VideoDAO();
-			String userid = XScope.getApplication("username", request).toString();
+			String userid = XScope.getSession(request, "username").toString();
 			List<Video> list = dao.findnotexists(0, userid);
 			if(list == null) {
 				request.setAttribute("message", "No videos yet!");
@@ -214,15 +213,18 @@ public class UserServlet extends HttpServlet {
 	
 	protected void likeVideo(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String page = request.getParameter("page");
 		Date date = new Date();
 		UserDAO daou = new UserDAO();
 		VideoDAO daov = new VideoDAO();
-		String userid = XScope.getApplication("username", request).toString();
+		String userid = XScope.getSession(request, "username").toString();
 		String videoid = request.getParameter("VideoID");
 		User user = daou.findByID(userid);
 		Video video = daov.findByID(videoid);
 		FavoriteDAO daof = new FavoriteDAO();
 		Favorite fv = daof.findLikeVideo(videoid, userid);
+		HttpSession session3 = request.getSession();
+		session3.setAttribute("user", user);
 		if(fv != null) {
 			request.setAttribute("message", "You already liked this song!");
 		}else {
@@ -230,16 +232,22 @@ public class UserServlet extends HttpServlet {
 			daof.insert(favorite);
 			request.setAttribute("message", "Thank you for liking the song!");
 		}
-		findVideoNotLike(request, response);
-		request.setAttribute("views", "article.jsp");
-		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+		if(page.equals("article")) {
+			response.sendRedirect(request.getContextPath() + "/UserServlet/home");
+		}else {
+			response.sendRedirect(request.getContextPath() + "/UserServlet/details?VideoID="+videoid);
+		}
+//		findVideoNotLike(request, response);
+//		request.setAttribute("views", "article.jsp");
+//		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 	}
 	protected void unLikeVideo(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		String userid = XScope.getApplication("username", request).toString();
+		String userid = XScope.getSession(request, "username").toString();
 		String videoid = request.getParameter("VideoID");
 		FavoriteDAO daof = new FavoriteDAO();
 		Favorite dfv = daof.findLikeVideo(videoid, userid);
+		String page = request.getParameter("page");
 		if(dfv == null) {
 			request.setAttribute("message", "You already Unliked this song!");
 		}else {
@@ -247,45 +255,53 @@ public class UserServlet extends HttpServlet {
 			findVideoNotLike(request, response);
 			request.setAttribute("message", "You already liked this song!");
 		}
-		request.setAttribute("views", "article.jsp");
-		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+		if(page.equals("article")) {
+			response.sendRedirect(request.getContextPath() + "/UserServlet/myfavorite");
+		}else {
+			response.sendRedirect(request.getContextPath() + "/UserServlet/details?VideoID="+videoid);
+		}
 	}
 	protected void VideoDetails(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		VideoDAO dao = new VideoDAO();
-		FavoriteDAO daof = new FavoriteDAO();
-		String videoId = request.getParameter("VideoID");
-		Video video = dao.findByID(videoId);
-		List<Video> listvideo = dao.findAll();
-		LinkedList<Video> list = new LinkedList<>();
-		HttpSession session = request.getSession();
-		String userId = XScope.getLoginUsername(request, "username");
-		session.setAttribute("nameytb", video);
-		String testNameCookie = CookieUtils.get(videoId, request);
-		if(testNameCookie != null) {
-			CookieUtils.add(videoId, videoId, 0, response);
-			CookieUtils.add(videoId, videoId, 30*24, response);
-		}{
-			CookieUtils.add(videoId, videoId, 30*24, response);
-		}
-		for(Video vd : listvideo) {
-			String vdck = CookieUtils.get(vd.getId(), request);
-			if(vdck != "") {
-				list.add(vd);
+		try {
+			VideoDAO dao = new VideoDAO();
+			FavoriteDAO daof = new FavoriteDAO();
+			String videoId = request.getParameter("VideoID");
+			Video video = dao.findByID(videoId);
+			List<Video> listvideo = dao.findAll();
+			LinkedList<Video> list = new LinkedList<>();
+			HttpSession session = request.getSession();
+			if(XScope.getSession(request, "username") != null) {
+				String userId = XScope.getSession(request, "username").toString();
+				UserDAO daou = new UserDAO();
+				User user = daou.findByID(userId);
+				if(user != null){
+					Favorite fv = daof.findLikeVideoCookie(videoId, userId);
+					if(fv != null) {
+						request.setAttribute("chk", true);
+						request.setAttribute("user", user);
+					}
+				}
 			}
-		}
-		UserDAO daou = new UserDAO();
-		User user = daou.findByID(userId);
-		
-		if(user != null){
-			Favorite fv = daof.findLikeVideoCookie(videoId, userId);
-			if(fv != null) {
-				request.setAttribute("chk", true);
-				request.setAttribute("user", user);
+			session.setAttribute("nameytb", video);
+			String testNameCookie = CookieUtils.get(videoId, request);
+			if(testNameCookie != null) {
+				CookieUtils.add(videoId, videoId, 0, response);
+				CookieUtils.add(videoId, videoId, 30*24, response);
+			}{
+				CookieUtils.add(videoId, videoId, 30*24, response);
 			}
+			for(Video vd : listvideo) {
+				String vdck = CookieUtils.get(vd.getId(), request);
+				if(vdck != "") {
+					list.add(vd);
+				}
+			}
+			
+			request.setAttribute("list", list);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		HttpSession session2 = request.getSession();
-		session2.setAttribute("list", list);
 //		request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 	}
 	protected void findAllVideoNext(HttpServletRequest request, HttpServletResponse response)
@@ -321,7 +337,7 @@ public class UserServlet extends HttpServlet {
 						request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 					}else if(!id.equals("") && islogin.equals("yes")) {
 						String id2 = request.getParameter("VideoID");
-						String userid = XScope.getApplication("username", request).toString();
+						String userid = XScope.getSession( request, "username").toString();
 						ArrayList<Video> yeslst = dao.findallnotexists(userid);
 						int maxpage2 = yeslst.size() / 6;
 						int prd2 = yeslst.size() % 6;
@@ -366,7 +382,7 @@ public class UserServlet extends HttpServlet {
 					request.getRequestDispatcher("/views/home.jsp").forward(request, response);
 					}else if(!id.equals("") && islogin.equals("yes")) {
 				String id2 = request.getParameter("VideoID");
-				String userid = XScope.getApplication("username", request).toString();
+				String userid = XScope.getSession( request, "username").toString();
 				ArrayList<Video> yeslst = dao.findallnotexists(userid);
 				int prd2 = yeslst.size() % 6;
 				int index = 0;
@@ -393,7 +409,7 @@ public class UserServlet extends HttpServlet {
 	protected void MyFavorite(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		VideoDAO dao = new VideoDAO();
-		String userid = XScope.getApplication("username", request).toString();
+		String userid = XScope.getSession(request, "username").toString();
 		List<Video> list = dao.findmyfavorite(userid);
 		if(list == null) {
 			request.setAttribute("message", "No favorites videos yet!");
@@ -414,7 +430,7 @@ public class UserServlet extends HttpServlet {
 				VideoDAO daov = new VideoDAO();
 				Video video = daov.findByID(videoid);
 				UserDAO daou = new UserDAO();
-				String userid = XScope.getApplication("username", request).toString();
+				String userid = XScope.getSession( request, "username").toString();
 				User user = daou.findByID(userid);
 				Date date = new Date();
 				Properties prop = new Properties();
@@ -578,7 +594,7 @@ public class UserServlet extends HttpServlet {
 			throws ServletException, IOException{
 		request.setCharacterEncoding("utf-8");
 		response.setCharacterEncoding("utf-8");
-		String username = XScope.getApplication("username", request).toString();
+		String username = XScope.getSession( request, "username").toString();
 		UserDAO dao = new UserDAO();
 		User cuser = dao.findByID(username);
 		User user = new User();

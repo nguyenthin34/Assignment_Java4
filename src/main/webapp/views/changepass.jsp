@@ -77,6 +77,8 @@
   	 <jsp:include page="/admin/toasts.jsp">
    	<jsp:param value="${message }" name="message"/>
   	 </jsp:include>
-  	</c:if>    <script type="text/javascript" src="${pageContext.request.contextPath}/views/js/change.js"></script>
+  	</c:if>    
+  	<script type="text/javascript" src="${pageContext.request.contextPath}/views/js/change.js">
+  	</script>
   </body>
 </html>

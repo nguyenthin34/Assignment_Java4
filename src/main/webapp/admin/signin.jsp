@@ -24,7 +24,7 @@
           <h1>Sign In</h1>
         </div>
         <div class="control block-cube block-input">
-          <input name="userid" placeholder="Username" type="text" required/>
+          <input name="userid" placeholder="Username" type="text" required value="${adminnameid }"/>
           <div class="bg-top">
             <div class="bg-inner"></div>
           </div>

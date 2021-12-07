@@ -15,15 +15,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import javax.servlet.jsp.PageContext;
 
 import org.apache.commons.beanutils.BeanUtils;
 
-import com.poly.dao.FavoriteDAO;
 import com.poly.dao.ReportDAO;
 import com.poly.dao.UserDAO;
 import com.poly.dao.VideoDAO;
-import com.poly.entity.Favorite;
 import com.poly.entity.Report;
 import com.poly.entity.Report2;
 import com.poly.entity.Report3;
@@ -35,7 +32,7 @@ import com.poly.helper.XScope;
 @WebServlet({"/AdminServlet", "/AdminServlet/signinad", "/AdminServlet/listvideo"
 	, "/AdminServlet/editvideo", "/AdminServlet/insertvideo", "/AdminServlet/updatevideo"
 	, "/AdminServlet/resetvideo", "/AdminServlet/removevideo", "/AdminServlet/listuser"
-	,"/AdminServlet/edituser","/AdminServlet/updateuser","/AdminServlet/removeuser"
+	,"/AdminServlet/edituser","/AdminServlet/updateuser","/AdminServlet/removeuser","/AdminServlet/insertuser"
 	,"/AdminServlet/favorites","/AdminServlet/findfv","/AdminServlet/favoritesuser"
 	,"/AdminServlet/findfavouser","/AdminServlet/shared","/AdminServlet/findshared"
 	,"/AdminServlet/home","/AdminServlet/signout"})
@@ -51,11 +48,9 @@ public class AdminServlet extends HttpServlet {
 			request.setAttribute("views", "homepage.jsp");
 			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 		}else if(uri.contains("signout")) {
-			XScope.setApplication(request, "username", null);
-			ServletContext application = request.getServletContext();
-			application.setAttribute("user", null);
-			request.setAttribute("views", "signin.jsp");
-			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+			XScope.setSession(request, "username", null);
+			XScope.setSession(request, "user", null);
+			response.sendRedirect(request.getContextPath() + "/AdminServlet");
 		}else if(uri.contains("editvideo")) {
 			String videoid = request.getParameter("VideoID");
 			if(videoid != null) {
@@ -66,6 +61,12 @@ public class AdminServlet extends HttpServlet {
 			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 		}else if(uri.contains("removevideo")) {
 			removevideo(request, response);
+		}else if(uri.contains("insertuser")) {
+			request.setAttribute("views", "adduser.jsp");
+			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+		}else if(uri.contains("insertvideo")) {
+			request.setAttribute("views", "addvideo.jsp");
+			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 		}else if(uri.contains("listuser")) {
 			listUser(request, response);
 		}else if(uri.contains("edituser")) {
@@ -92,7 +93,7 @@ public class AdminServlet extends HttpServlet {
 			listshare(request, response);
 		}else{
 			request.setAttribute("views", "signin.jsp");
-			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+			checkUser(request, response);
 		}
 	}
 
@@ -111,7 +112,19 @@ public class AdminServlet extends HttpServlet {
 			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 		}else if(uri.contains("updateuser")) {
 			updateuser(request, response);
+		}else if(uri.contains("insertuser")) {
+			insertuser(request, response);
 		}
+	}
+	
+	protected void checkUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String username = CookieUtils.get("UserAdminID", request);
+		if(username.equals("")) {
+			response.sendRedirect("/admin/AdminServlet");
+			return;
+		}
+		XScope.setSession(request, "adminnameid", username);
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 	}
 	protected void signin(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -123,14 +136,13 @@ public class AdminServlet extends HttpServlet {
 		try {
 			if(user != null) {
 				if(user.getPasswords().equalsIgnoreCase(pass)) {
-					XScope.setApplication(request, "username", username);
+					XScope.setSession(request, "username", username);
 					if(user.getAdmins()) {
 						if(remember != null) {
 							CookieUtils.add("UserAdminID", username, 30*24, response);
 						}
 						request.setAttribute("message", "Login Success");
-						ServletContext application = request.getServletContext();
-						application.setAttribute("user", user);
+						XScope.setSession(request, "user", user);
 					}else {
 						request.setAttribute("message", "you can't login here");
 						request.setAttribute("views", "signin.jsp");
@@ -149,8 +161,7 @@ public class AdminServlet extends HttpServlet {
 				request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 				return;
 			}
-			request.setAttribute("views", "homepage.jsp");
-			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+			response.sendRedirect(request.getContextPath() + "/AdminServlet/home");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -159,7 +170,7 @@ public class AdminServlet extends HttpServlet {
 	protected void listVideo(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		VideoDAO dao = new VideoDAO();
-		List<Video> listvideo = dao.findpage();
+		List<Video> listvideo = dao.findAll();
 		if(listvideo != null) {
 			request.setAttribute("listvideo", listvideo);
 		}else {
@@ -418,6 +429,32 @@ public class AdminServlet extends HttpServlet {
 				}
 		}
 		request.setAttribute("views", "RpShared.jsp");	
+		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	
+	protected void insertuser(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		try {
+			UserDAO dao = new UserDAO();
+			User cuser = dao.findByID(request.getParameter("id"));
+			if(cuser == null) {
+				User nuser = new User();
+				BeanUtils.populate(nuser, request.getParameterMap());
+				dao.insert(nuser);
+				request.setAttribute("user", nuser);
+				request.setAttribute("message", "Insert User Success");
+				request.setAttribute("views", "adduser.jsp");
+			}else {
+				request.setAttribute("message", "User exists");
+				request.setAttribute("views", "adduser.jsp");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("message", "Insert failed");
+			request.setAttribute("views", "adduser.jsp");
+		}
 		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 	}
 }
