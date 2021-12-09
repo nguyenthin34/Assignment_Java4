@@ -48,7 +48,7 @@
           <div class="card-body">
            <c:forEach var="topview" items="${topview }">
            		 <div class="list-group">
-            	  <a href="${url }/details?VideoID=${topview.id}" class="list-group-item list-group-item-action">${topview.title }
+            	  <a href="${pageContext.request.contextPath}/details?VideoID=${topview.id}" class="list-group-item list-group-item-action">${topview.title }
               	 <span class="badge badge-dark float-md-right bg-primary">${topview.views }</span></a>
            		 </div>
            </c:forEach>
@@ -82,7 +82,7 @@
           <div class="card-body">
             <c:forEach var="toplike" items="${toplike }">
             	<div class="list-group">
-            	<a href="${url }/details?VideoID=${toplike.video.id}" class="list-group-item list-group-item-action">${toplike.video.title }
+            	<a href="${pageContext.request.contextPath}/details?VideoID=${toplike.video.id}" class="list-group-item list-group-item-action">${toplike.video.title }
                 <span class="badge badge-dark float-md-right bg-primary">${toplike.countlike }</span></a>
            		</div>
             </c:forEach>
@@ -114,7 +114,7 @@
           <div class="card-body">
             <c:forEach var="topshare" items="${topshare }">
             	<div class="list-group">
-             	<a href="${url }/details?VideoID=${topshare.video.id}" class="list-group-item list-group-item-action">${topshare.video.title }
+             	<a href="${pageContext.request.contextPath}/details?VideoID=${topshare.video.id}" class="list-group-item list-group-item-action">${topshare.video.title }
                 <span class="badge badge-dark float-md-right bg-primary">${topshare.countshare }</span></a>
         	    </div>
             </c:forEach>

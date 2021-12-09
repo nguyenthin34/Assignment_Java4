@@ -42,8 +42,8 @@
           </div>
           <div class="row">
           	<div  class="product-price-btn">
-          	<a href="${url }/likevd?VideoID=${nameytb.id }&page=details"><button type="button" class="col-6">
-          	Like</button></a>
+          	<a href="${url }/unlike?VideoID=${nameytb.id }&page=details"><button type="button" class="col-6">
+          	UnLike</button></a>
           	<a href="${url }/share?VideoID=${nameytb.id }"><button type="button" class="col-6">Share</button></a>
          	 </div>
           </div>

@@ -13,7 +13,7 @@
 </style>
 </head>
 <body>
-<c:url var="url" value="/UserServlet/move"></c:url>
+<c:url var="url" value="/move"></c:url>
 		<div class="pagination_container">
       <ul class="pagi">
        <c:choose>

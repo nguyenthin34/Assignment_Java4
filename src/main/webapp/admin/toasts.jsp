@@ -24,15 +24,14 @@
         aria-atomic="true"
       >
         <div class="toast-header">
-         <!-- <img
+      <img
             src="https://i.pinimg.com/564x/73/e7/ce/73e7ce2dd95c8e6af4a5e815b27ec404.jpg"
             class="rounded me-2 img-fluid"
             alt="..."
-          /> -->
+          /> 
          <!--  <iframe width="560" height="315" src="https://www.youtube.com/embed/LZnyRWELpww?autoplay=1" 
           title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
            allowfullscreen ></iframe> -->
-           <video width="560" height="315" src="${pageContext.request.contextPath}/video/oibanoi.mp4" autoplay></video>
           <button
             type="button"
             class="btn-close"
@@ -43,7 +42,22 @@
         <div class="toast-body"><b>${message }</b></div>
       </div>
     </div>
-    <script src="${pageContext.request.contextPath}/admin/js/tast.js"></script>
+    <script type="text/javascript">
+    var toastTrigger = document.getElementById("liveToastBtn");
+    var toastLiveExample = document.getElementById("liveToast");
+    if (toastTrigger) {
+      toastTrigger.addEventListener("click", function () {
+        var toast = new bootstrap.Toast(toastLiveExample);
+        toast.show();
+      });
+    }
+    function live() {
+      var toast = new bootstrap.Toast(toastLiveExample);
+      toast.show();
+    }
+
+    </script>
+
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
       integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"

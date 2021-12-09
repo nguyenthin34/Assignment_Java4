@@ -6,14 +6,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import javax.security.auth.message.callback.PrivateKeyCallback.Request;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -26,18 +25,22 @@ import com.poly.entity.Report2;
 import com.poly.entity.Report3;
 import com.poly.entity.User;
 import com.poly.entity.Video;
+import com.poly.helper.AddImage;
 import com.poly.helper.CookieUtils;
 import com.poly.helper.XScope;
 @MultipartConfig
-@WebServlet({"/AdminServlet", "/AdminServlet/signinad", "/AdminServlet/listvideo"
+@WebServlet({"/AdminServlet", "/signinad", "/AdminServlet/listvideo"
 	, "/AdminServlet/editvideo", "/AdminServlet/insertvideo", "/AdminServlet/updatevideo"
 	, "/AdminServlet/resetvideo", "/AdminServlet/removevideo", "/AdminServlet/listuser"
 	,"/AdminServlet/edituser","/AdminServlet/updateuser","/AdminServlet/removeuser","/AdminServlet/insertuser"
 	,"/AdminServlet/favorites","/AdminServlet/findfv","/AdminServlet/favoritesuser"
 	,"/AdminServlet/findfavouser","/AdminServlet/shared","/AdminServlet/findshared"
-	,"/AdminServlet/home","/AdminServlet/signout"})
+	,"/AdminServlet/home","/signout"})
 public class AdminServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	/**
+	 *
+	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String uri = request.getRequestURI();
 		VideoDAO dao = new VideoDAO();
@@ -49,8 +52,9 @@ public class AdminServlet extends HttpServlet {
 			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 		}else if(uri.contains("signout")) {
 			XScope.setSession(request, "username", null);
-			XScope.setSession(request, "user", null);
-			response.sendRedirect(request.getContextPath() + "/AdminServlet");
+			XScope.setSession(request, "admin", null);
+			request.setAttribute("views", "signin.jsp");
+			request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 		}else if(uri.contains("editvideo")) {
 			String videoid = request.getParameter("VideoID");
 			if(videoid != null) {
@@ -92,7 +96,7 @@ public class AdminServlet extends HttpServlet {
 		}else if(uri.contains("shared")) {
 			listshare(request, response);
 		}else{
-			request.setAttribute("views", "signin.jsp");
+			
 			checkUser(request, response);
 		}
 	}
@@ -124,6 +128,7 @@ public class AdminServlet extends HttpServlet {
 			return;
 		}
 		XScope.setSession(request, "adminnameid", username);
+		request.setAttribute("views", "signin.jsp");
 		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 	}
 	protected void signin(HttpServletRequest request, HttpServletResponse response)
@@ -132,7 +137,7 @@ public class AdminServlet extends HttpServlet {
 		String username = request.getParameter("userid");
 		String pass = request.getParameter("passwords");
 		String remember = request.getParameter("remember");
-		User user = dao.checklogin(username, pass);
+		User user = dao.findByID(username);
 		try {
 			if(user != null) {
 				if(user.getPasswords().equalsIgnoreCase(pass)) {
@@ -142,7 +147,8 @@ public class AdminServlet extends HttpServlet {
 							CookieUtils.add("UserAdminID", username, 30*24, response);
 						}
 						request.setAttribute("message", "Login Success");
-						XScope.setSession(request, "user", user);
+						HttpSession session = request.getSession();
+						session.setAttribute("admin", user);
 					}else {
 						request.setAttribute("message", "you can't login here");
 						request.setAttribute("views", "signin.jsp");
@@ -183,36 +189,27 @@ public class AdminServlet extends HttpServlet {
 			throws ServletException, IOException {
 		request.setCharacterEncoding("utf-8");
 		response.setCharacterEncoding("utf-8");
-		VideoDAO dao = new VideoDAO();
 		Video video = new Video();
-		String forder = request.getServletContext().getRealPath("/images");
-//		Path uploadpath = Paths.get(forder);
-		File dir = new File(forder);
-		if(dir.exists()) {
-			dir.mkdirs();
-		}
-		// lưu các file upload vào thư mục files
-		Part photo = request.getPart("photo_file"); // file hình
-		String imagefilename = Path.of(photo.getSubmittedFileName()).getFileName().toString();
-		File photofile = new File(dir, photo.getSubmittedFileName());
-		photo.write(photofile.getAbsolutePath());
+		VideoDAO dao = new VideoDAO();
+		AddImage ad = new AddImage();
+		String imagefilename = ad.uploadImage(request);
 		try {
 			video.setPoster(imagefilename);
 			BeanUtils.populate(video, request.getParameterMap());
-			Video checkvideo = dao.findByID(video.getId());
-			if(checkvideo == null) {
-				dao.insert(video);
-				request.setAttribute("message", "Insert Success");
+			Video cvideo = dao.findByID(video.getId());
+			if(cvideo != null) {
+				request.setAttribute("message", "Video Exists!");
+				request.setAttribute("views", "editvideo.jsp");
+			}else if(video.getId().equals("") || video.getPoster().equals("") || video.getTitle().equals("")) {
+				request.setAttribute("message", "Did you leave something blank?");
 				request.setAttribute("views", "editvideo.jsp");
 			}else {
-				request.setAttribute("message", "Video already exists");
-				request.setAttribute("views", "editvideo.jsp");
+			dao.insert(video);
+			request.setAttribute("message", "Insert Video Success");
+			request.setAttribute("views", "editvideo.jsp");
 			}
-			
 		} catch (Exception e) {
 			e.printStackTrace();
-			request.setAttribute("message", "Insert Failed");
-			request.setAttribute("views", "editvideo.jsp");
 		}
 		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
 	}
@@ -245,9 +242,19 @@ public class AdminServlet extends HttpServlet {
 			}
 			try {
 				BeanUtils.populate(video, request.getParameterMap());
+				Video vd = dao.findByID(video.getId());
+				if(vd == null) {
+					request.setAttribute("message", "Video Not Exists!");
+					request.setAttribute("views", "editvideo.jsp");
+				}
+				if(video.getId().equals("") || video.getPoster().equals("") || video.getTitle().equals("")) {
+					request.setAttribute("message", "Did you leave something blank?");
+					request.setAttribute("views", "editvideo.jsp");
+				}else {
 				dao.update(video);
 				request.setAttribute("message", "Update Success");
 				request.setAttribute("views", "editvideo.jsp");
+				}
 			} catch (Exception e) {
 				request.setAttribute("message", "Update Failed");
 				request.setAttribute("views", "editvideo.jsp");
@@ -309,10 +316,22 @@ public class AdminServlet extends HttpServlet {
 			if(cuser != null) {
 				User nuser = new User();
 				BeanUtils.populate(nuser, request.getParameterMap());
+				User euser = dao.findByEmail2(nuser.getEmail());
+				User ccuser = dao.findByID(nuser.getId());
+				
+				if(nuser.getEmail() == null || nuser.getId() == null || nuser.getPasswords() == null) {
+					request.setAttribute("message", "Did you leave something blank?");
+					request.setAttribute("views", "adduser.jsp");
+				}else if(euser != null && !nuser.getEmail().equals(ccuser.getEmail())) {
+					request.setAttribute("message", "Email Exists!!!");
+					request.setAttribute("views", "edituser.jsp");
+				}
+				else {
 				dao.update(nuser);
 				request.setAttribute("user", nuser);
 				request.setAttribute("message", "Update User Success");
 				request.setAttribute("views", "edituser.jsp");
+				}
 			}else {
 				request.setAttribute("message", "User not exists");
 				request.setAttribute("views", "edituser.jsp");
@@ -442,10 +461,20 @@ public class AdminServlet extends HttpServlet {
 			if(cuser == null) {
 				User nuser = new User();
 				BeanUtils.populate(nuser, request.getParameterMap());
-				dao.insert(nuser);
-				request.setAttribute("user", nuser);
-				request.setAttribute("message", "Insert User Success");
-				request.setAttribute("views", "adduser.jsp");
+				if(nuser.getEmail().equals("")|| nuser.getId().equals("") || nuser.getPasswords().equals("")) {
+					request.setAttribute("message", "Did you leave something blank?");
+					request.setAttribute("views", "adduser.jsp");
+				}
+				User euser = dao.findByEmail2(nuser.getEmail());
+				if(euser != null) {
+					request.setAttribute("message", "Email Exists!!!");
+					request.setAttribute("views", "adduser.jsp");
+				}else {
+					dao.insert(nuser);
+					request.setAttribute("user", nuser);
+					request.setAttribute("message", "Insert User Success");
+					request.setAttribute("views", "adduser.jsp");
+				}
 			}else {
 				request.setAttribute("message", "User exists");
 				request.setAttribute("views", "adduser.jsp");
@@ -456,5 +485,32 @@ public class AdminServlet extends HttpServlet {
 			request.setAttribute("views", "adduser.jsp");
 		}
 		request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
+	}
+	
+	protected void upfile(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
+		// đường dẫn thư mục tính từ gốc của website
+		String uplaodforder =  request.getServletContext().getRealPath("/files");
+		Path uploadpath = Paths.get(uplaodforder);
+		File dir = new File(uplaodforder);
+		if (!dir.exists()) { // tạo nếu chưa tồn tại
+			dir.mkdirs();
+			}
+		// lưu các file upload vào thư mục files
+		Part photo = request.getPart("photo_file"); // file hình
+		Part doc = request.getPart("doc_file");
+		String namept = photo.toString();
+		request.setAttribute("namept", namept);
+		String imagefilename = Path.of(photo.getSubmittedFileName()).getFileName().toString();
+		request.setAttribute("namept1", imagefilename);
+		String docfilename = Path.of(doc.getSubmittedFileName()).getFileName().toString();
+		photo.write(Paths.get(uploadpath.toString(), imagefilename).toString());
+		doc.write(Paths.get(uploadpath.toString(), docfilename).toString());
+		// chia sẻ cho result.jsp để hiển thị
+		request .setAttribute("image", imagefilename);
+		request .setAttribute("document", docfilename);
+		request.getRequestDispatcher("/views/result.jsp").forward(request, response);
 	}
 }

@@ -2,13 +2,15 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jstl/core_rt" prefix="c"%>
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/edituser.css" />
+    <style type="text/css">
+    <%@include file="css/adduser.css" %>
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
   </head>
   <body>
@@ -20,7 +22,7 @@
         </div>
         <div class="row clearfix">
           <div class="">
-            <form action="${url }" method="post">
+            <form action="${url }/insertuser" method="post">
               <div class="row clearfix">
                 <div class="col_half">
                   <div class="input_field">
@@ -59,7 +61,7 @@
                 />
               </div>
                		 <div class="input_field radio_option">
-               			 <input type="radio" name="admins" id="rd1" value="true"/>
+               			 <input type="radio" name="admins" id="rd1" value="true" checked/>
                			 <label for="rd1">Admin</label>
                 		 <input type="radio" name="admins" id="rd2" value="false"/>
                 		 <label for="rd2">User</label>

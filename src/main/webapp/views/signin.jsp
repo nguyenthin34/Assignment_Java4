@@ -21,7 +21,7 @@
   <!-- This snippet uses Font Awesome 5 Free as a dependency. You can download it at fontawesome.io! -->
 
   <body>
-  	<c:url var="url" value="/UserServlet"></c:url>
+  	<c:url var="url" value="/"></c:url>
     <div class="container-fluid ps-md-0">
       <div class="row g-0">
         <div class="d-none d-md-flex col-md-4 col-lg-6 bg-image"></div>
@@ -73,7 +73,7 @@
                         Sign in
                       </button>
                       <div class="text-center">
-                        <a class="small" href="${url }/forgot">Forgot password?</a>
+                        <a class="small" href="${url }forgot">Forgot password?</a>
                       </div>
                     </div>
                   </form>

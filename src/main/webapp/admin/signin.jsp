@@ -14,12 +14,15 @@
       integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
       crossorigin="anonymous"
     />
+    <style type="text/css">
+    <%@include file="css/signin.css" %>
+    </style>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/signin.css" />
   </head>
   <body>
-  <c:url var="url" value="/AdminServlet"></c:url>
+  <c:url var="url" value="/"></c:url>
     <div class="body_x">
-      <form autocomplete="off" class="form" action="${url }/signinad" method="post">
+      <form autocomplete="off" class="form" action="${url }signinad" method="post">
         <div class="control">
           <h1>Sign In</h1>
         </div>

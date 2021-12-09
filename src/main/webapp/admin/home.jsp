@@ -19,7 +19,10 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css"
     />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/home.css" />
+    <style type="text/css">
+    	<%@include file="css/home.css" %>
+    </style>
+
   </head>
   <body>
   <c:url var="url" value="/AdminServlet"></c:url>
@@ -58,8 +61,8 @@
                         alt=""
                       />
                     </div>
-                    	<c:if test="${!empty user }">
-                    	<div><a href="${ url}/signout">Sign Out</a></div>
+                    	<c:if test="${!empty admin }">
+                    	<div><a href="${pageContext.request.contextPath}/signout">Sign Out</a></div>
                     	</c:if>  
                   </div>
               </div>
@@ -76,7 +79,7 @@
           </div>
         </div>
         <!-- Main Navigation -->
-        <c:if test="${!empty user }">
+        <c:if test="${!empty admin }">
         	<nav class="main_nav">
           <div class="container">
             <div class="row">
@@ -199,7 +202,7 @@
 					<jsp:param value="${listvideo }" name="listvideo"/>
 					<jsp:param value="${listuser }" name="listuser"/>
 					<jsp:param value="${video }" name="video"/>
-					<jsp:param value="${user }" name="user"/>
+					<jsp:param value="${admin }" name="user"/>
 					<jsp:param value="${videore }" name="video"/>
 						<jsp:param value="${listreport }" name="listreport"/>
 						<jsp:param value="${listreport2 }" name="listreport2"/>

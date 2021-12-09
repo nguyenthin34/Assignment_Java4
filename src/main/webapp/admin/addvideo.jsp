@@ -102,13 +102,13 @@
                 	<div class="col-md-6">
                   		<div class="form-check">
                     	<label class="labels">Active</label>
-                    	<input type="radio" class="form-check-input" value="true" name="actives" ${video.actives ? 'checked' : '' }/>
+                    	<input type="radio" class="form-check-input" value="true" name="actives" checked/>
                   		</div>
                 	</div>
                 	<div class="col-md-6">
                   		<div class="form-check">
                     	<label class="labels">Inactive</label>
-                    	<input type="radio" class="form-check-input" value="false" name="actives" ${video.actives ? '' : 'checked' }/>
+                    	<input type="radio" class="form-check-input" value="false" name="actives" />
                    		</div>
                    </div>
                 </c:otherwise>

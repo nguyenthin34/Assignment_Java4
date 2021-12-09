@@ -1,5 +1,8 @@
 eclipse.preferences.version=1
 encoding//src/main/java/com/poly/dao/UserDAO.java=UTF-8
+encoding//src/main/java/com/poly/helper/AddImage.java=UTF-8
+encoding//src/main/java/com/poly/helper/CheckLoginFilter.java=UTF-8
+encoding//src/main/java/com/poly/helper/UserLginFilter.java=UTF-8
 encoding//src/main/java/com/poly/helper/XCookie.java=UTF-8
 encoding//src/main/java/com/poly/helper/XScope.java=UTF-8
 encoding//src/main/java/com/poly/servlet/AdminServlet.java=UTF-8

@@ -51,7 +51,8 @@
                               type="text"
                               name="name"
                               class="form-control"
-                              disabled
+								value="${profile.id }"
+								disabled
                               data-error="Firstname is required."
                             />
                           </div>
@@ -68,7 +69,7 @@
                               required="required"
                               data-error="Fullname is required."
                               maxlength="50"
-                              value="${fullname }"
+                              value="${profile.fullname }"
                             />
                           </div>
                         </div>
@@ -76,7 +77,7 @@
                       <div class="row">
                         <div class="col-md-6">
                           <div class="form-group">
-                            <label for="form_email">Email *</label>
+                            <label for="form_email">Email</label>
                             <input
                               id="form_email"
                               type="email"
@@ -85,7 +86,7 @@
                               placeholder="Please enter your email *"
                               required="required"
                               data-error="Valid email is required."
-                              value="${email }"
+                              value="${profile.email }"
                             />
                           </div>
                         </div>

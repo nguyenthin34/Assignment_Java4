@@ -7,12 +7,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
-import com.poly.entity.Favorite;
-import com.poly.entity.User;
 import com.poly.entity.Video;
 
 public class VideoDAO {
-
+	EntityManager em = JpaUtils.getEntityManager();
 	public void insert(Video video) {
 		EntityManager em = JpaUtils.getEntityManager();
 		EntityTransaction trans = em.getTransaction();
@@ -24,8 +22,6 @@ public class VideoDAO {
 			e.printStackTrace();
 			trans.rollback();
 			throw e;
-		} finally {
-			em.close();
 		}
 	}
 
@@ -40,8 +36,6 @@ public class VideoDAO {
 			e.printStackTrace();
 			trans.rollback();
 			throw e;
-		} finally {
-			em.close();
 		}
 	}
 
@@ -61,26 +55,19 @@ public class VideoDAO {
 			e.printStackTrace();
 			trans.rollback();
 			throw e;
-		} finally {
-			em.close();
-		}
+		} 
 	}
 
 	public ArrayList<Video> findAll() {
-		try {
-			EntityManager em = JpaUtils.getEntityManager();
+		
 			TypedQuery<Video> query = em.createQuery("SELECT v FROM Video v", Video.class);
-			
 			return (ArrayList<Video>) query.getResultList();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	public Video findByID(String videoID) {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
+			
 			Video video = em.find(Video.class, videoID);
 			return video;
 		} catch (Exception e) {
@@ -91,23 +78,18 @@ public class VideoDAO {
 
 	public List<Video> findpage() {
 		EntityManager em = JpaUtils.getEntityManager();
-		try {
-
 			TypedQuery<Video> query = em.createQuery("SELECT v FROM Video v", Video.class);
 			query.setFirstResult(0);
 			query.setMaxResults(6);
-			return query.getResultList();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+			List<Video> list = query.getResultList();
+			return list;
 	}
 
 	public ArrayList<Video> findnotexists(int first, String id) {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
-			String jpql = "SELECT v FROM Video v " + " where not exists (SELECT f FROM Favorite f WHERE "
-					+ " v.id = f.video.id AND f.user.id = :id)";
+			String jpql = "SELECT v FROM Video v "
+					+ " where not exists (SELECT f FROM Favorite f WHERE  v.id = f.video.id AND f.user.id = :id)";
 			TypedQuery<Video> query = em.createQuery(jpql, Video.class);
 			query.setParameter("id", id);
 			query.setFirstResult(first);
@@ -120,8 +102,9 @@ public class VideoDAO {
 	}
 	
 	public ArrayList<Video> findallnotexists(String id) {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
+			
 			String jpql = "SELECT v FROM Video v " + " where not exists (SELECT f FROM Favorite f WHERE "
 					+ " v.id = f.video.id AND f.user.id = :id)";
 			TypedQuery<Video> query = em.createQuery(jpql, Video.class);
@@ -134,8 +117,9 @@ public class VideoDAO {
 	}
 	
 	public ArrayList<Video> findpageallnotexists(String id, int first, int max) {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
+			
 			String jpql = "SELECT v FROM Video v " + " where not exists (SELECT f FROM Favorite f WHERE "
 					+ " v.id = f.video.id AND f.user.id = :id)";
 			TypedQuery<Video> query = em.createQuery(jpql, Video.class);
@@ -151,17 +135,21 @@ public class VideoDAO {
 
 	public List<Video> findmyfavorite(String id) {
 		EntityManager em = JpaUtils.getEntityManager();
-		String jpql = "SELECT v FROM Video v " + " where exists (SELECT f FROM Favorite f WHERE "
-				+ " v.id = f.video.id AND f.user.id = :id)";
-		TypedQuery<Video> query = em.createQuery(jpql, Video.class);
-		query.setParameter("id", id);
-		return query.getResultList();
-
+		try {	
+			String jpql = "SELECT v FROM Video v " + " where exists (SELECT f FROM Favorite f WHERE "
+					+ " v.id = f.video.id AND f.user.id = :id)";
+			TypedQuery<Video> query = em.createQuery(jpql, Video.class);
+			query.setParameter("id", id);
+			return query.getResultList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public List<Video> findpage(int first, int maxx) {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
 			String jpql = "SELECT v FROM Video v ";
 			TypedQuery<Video> query = em.createQuery(jpql, Video.class);
 			query.setFirstResult(first);
@@ -174,8 +162,8 @@ public class VideoDAO {
 	}
 
 	public List<Video> findbyVideoTitle(String title){
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
 			String jpql = "SELECT v FROM Video v "
 					+ " WHERE v.title like :keyword";
 			TypedQuery<Video> query = em.createQuery(jpql, Video.class);
@@ -188,8 +176,8 @@ public class VideoDAO {
 	}
 	
 	public List<Video> findbyVideoTitleNotlike(String title, String userid){
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
 			String jpql = "SELECT v FROM Video v "
 					+ " WHERE not "
 					+ " exists (SELECT f FROM Favorite f WHERE "
@@ -206,14 +194,15 @@ public class VideoDAO {
 	}
 	
 	public List<Video> topview(){
-		try {
 			EntityManager em = JpaUtils.getEntityManager();
+		try {
 			String jpql  = "SELECT v FROM Video v "
 					+ " ORDER BY v.views DESC ";
 			TypedQuery<Video> query = em.createQuery(jpql, Video.class);
 			query.setFirstResult(0);
 			query.setMaxResults(10);
-			return query.getResultList();
+			List<Video> list = query.getResultList();
+			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

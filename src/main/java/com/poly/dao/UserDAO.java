@@ -8,7 +8,7 @@ import javax.persistence.TypedQuery;
 
 import com.poly.entity.User;
 
-public class UserDAO{
+public class UserDAO {
 
 //	public UserDAO() {
 //		super(User.class);
@@ -67,26 +67,33 @@ public class UserDAO{
 	}
 
 	public User findByID(String userID) {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
+
 			User user = em.find(User.class, userID);
 			return user;
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			em.close();
 		}
 		return null;
 	}
 
 	public List<User> findAll() {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
+
 			TypedQuery<User> query = em.createNamedQuery("User.findAll", User.class);
 			return query.getResultList();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			em.close();
 		}
 		return null;
 	}
+
 	public User checklogin(String id, String password) {
 		try {
 			EntityManager em = JpaUtils.getEntityManager();
@@ -103,10 +110,11 @@ public class UserDAO{
 		}
 		return null;
 	}
-	
+
 	public User findByEmail(String userID, String email) {
+		EntityManager em = JpaUtils.getEntityManager();
 		try {
-			EntityManager em = JpaUtils.getEntityManager();
+
 			String jpql = "SELECT u FROM User u WHERE u.id =:id AND u.email =:email";
 			TypedQuery<User> query = em.createQuery(jpql, User.class);
 			query.setParameter("id", userID);
@@ -114,10 +122,28 @@ public class UserDAO{
 			return query.getSingleResult();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			em.close();
 		}
 		return null;
 	}
-	
+
+	public User findByEmail2(String email) {
+		EntityManager em = JpaUtils.getEntityManager();
+		try {
+
+			String jpql = "SELECT u FROM User u WHERE u.email =:email";
+			TypedQuery<User> query = em.createQuery(jpql, User.class);
+			query.setParameter("email", email);
+			return query.getSingleResult();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			em.close();
+		}
+		return null;
+	}
+
 	public User findByPass(String userID, String pass) {
 		try {
 			EntityManager em = JpaUtils.getEntityManager();
@@ -129,8 +155,7 @@ public class UserDAO{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	return null;
+		return null;
 	}
-	
 
 }

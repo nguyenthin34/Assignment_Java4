@@ -29,32 +29,19 @@
             	<div class="col-4 mt-2">
              		<div class="card text-center">
                 	<div class="card-body">
-                  		
-                  		<img src="${pageContext.request.contextPath}/images/${item.poster }" alt="No image" width="80%" class="fluid"/>
-                  		
+                  		<a href="${url }/details?VideoID=${item.id}">
+                  		<img src="${pageContext.request.contextPath}/images/${item.poster }" alt="ahihi" width="90%" class="fluid"/></a>
                  	 <div class="row border-top mt-2">
-                   		 <a href="${pageContext.request.contextPath}/details?VideoID=${item.id}"><b>${item.title }</b>
-                   		 </a>
+                   		 <b>${item.title }</b>
                  	 </div>
                 	</div>
                 	<div class="card-footer">
-                		<a href="${url }/likevd?VideoID=${item.id}&page=article" class="btn btn-success">Like</a>       			
-                  		<a href="${url }/share?VideoID=${item.id}" class="btn btn-info">Share</a>
+                			<a href="${url }/unlike?VideoID=${item.id}&page=article" class="btn btn-success">UnLike</a>
+                  			<a href="${url }/share?VideoID=${item.id}" class="btn btn-info">Share</a>
                		 </div>
               		</div>
             </div>
             </c:forEach>
-     			
-     			<c:choose>
-     				<c:when test="${article }"></c:when>
-     				<c:otherwise>
-     					<jsp:include page="pagination.jsp">
-             				<jsp:param value="${video }" name="video"/>
-             				<jsp:param value="${user }" name="user"/>
-             			</jsp:include>
-     				</c:otherwise>
-     			</c:choose>
-             
 		</div>   
         </div>
         <div class="col-3">

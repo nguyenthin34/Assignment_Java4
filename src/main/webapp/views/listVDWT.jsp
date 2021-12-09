@@ -16,18 +16,18 @@
     />
   </head>
   <body>
-  <c:url var="url" value="/UserServlet"></c:url>
+  <c:url var="url" value="/"></c:url>
     <c:forEach var="list" items="${list }">
     	<ul class="list-group mb-3">
       <li class="list-group-item">
         <div class="card mb-3" style="max-width: 540px">
           <div class="row g-0">
             <div class="col-md-4">
-              <img src="/Assigment/images/${list.poster}" class="img-fluid rounded-start" alt="..." />
+              <img src="${pageContext.request.contextPath}/images/${list.poster}" class="img-fluid rounded-start" alt="..." />
             </div>
             <div class="col-md-8">
               <div class="card-body">
-               <a href="${url }/details?VideoID=${list.id}"><h5 class="card-title">${list.title}</h5></a>
+               <a href="${url}details?VideoID=${list.id}&page=details"><h5 class="card-title">${list.title}</h5></a>
                 <p class="card-text">
                   ${list.descriptions}
                 </p>

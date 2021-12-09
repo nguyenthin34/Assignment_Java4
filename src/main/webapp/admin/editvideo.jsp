@@ -23,11 +23,14 @@
     <div  class="container rounded bg-white mt-5 mb-5">
      <form action="${url }" method="post" enctype="multipart/form-data">
      	 <div class="row">
+     	 <h1>
+     	 <Context docBase="C:\tmp0\" path="/images" />
+     	 </h1>
         <div class="col-md-5 border-right">
           <div class="d-flex flex-column align-items-center text-center p-3 py-5">
           <div class="card-body">
                 <img id="poster" 
-              		src="${pageContext.request.contextPath}/images/${video.poster }" alt="No Image" width="90%" class="fluid" />
+              		src="${pageContext.request.contextPath}/images/Neu_em_khong_hanh_phuc.png" alt="No Image" width="90%" class="fluid" />
                 	</div>
        			 <div class="button-wrapper">
   				<span class="label">Upload File</span>

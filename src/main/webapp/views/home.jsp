@@ -16,7 +16,7 @@
 </head>
 <body>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
-		<c:url var="url" value="/UserServlet"></c:url>
+		<c:url var="url" value="/"></c:url>
     <div class="super_container">
       <!-- Header -->
       <header class="header">
@@ -69,13 +69,13 @@
                     </div>
                      <c:choose>
                     	<c:when test="${!empty user }">
-                    		<div><a href="${ url}/profile">Profile</a></div>
-                    		<div><a href="${ url}/change">Change Password</a></div>
-                    		<div><a href="${ url}/logoff">Log Off</a></div>
+                    		<div><a href="${ url}UserServlet/profile">Profile</a></div>
+                    		<div><a href="${ url}UserServlet/change">Change Password</a></div>
+                    		<div><a href="${ url}logoff">Log Off</a></div>
                     	</c:when>
                     	<c:otherwise>
-                    		<div><a href="${ url}/register">Register</a></div>
-                    		<div><a href="${ url}/signin">Sign in</a></div>
+                    		<div><a href="${ url}register">Register</a></div>
+                    		<div><a href="${ url}signin">Sign in</a></div>
                     	</c:otherwise>
                     </c:choose>	    
                   </div>
@@ -113,7 +113,7 @@
                 <div class="header_search">
                   <div class="header_search_content">
                     <div class="header_search_form_container">
-                      <form action="${url }" class="header_search_form clearfix" method="get">
+                      <form action="${url }findtitle" class="header_search_form clearfix" method="get">
                         <input
                           type="search"
                           required="required"
@@ -164,15 +164,8 @@
                         alt="" />
                     </div>
                     <div class="wishlist_content">
-                       <c:choose>
-                    	<c:when test="${!empty user }">
-                    		 <div class="wishlist_text"><a href="${url }/myfavorite">Wishlist</a></div>
+                    		 <div class="wishlist_text"><a href="${url }UserServlet/myfavorite">Wishlist</a></div>
 							<div class="wishlist_count">${quantity }</div>
-                    	</c:when>
-                    	<c:otherwise>
-                    		 <div class="wishlist_text"><a href="${url }/signin">Wishlist</a></div>
-                    	</c:otherwise>
-                    </c:choose>
                     </div>
                   </div>
                   <!-- Cart -->
@@ -242,6 +235,5 @@
       integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
       crossorigin="anonymous"
     ></script>
-    <script src="js/home.js"></script>
 </body>
 </html>
