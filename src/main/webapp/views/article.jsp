@@ -29,9 +29,7 @@
             	<div class="col-4 mt-2">
              		<div class="card text-center">
                 	<div class="card-body">
-                  		
-                  		<img src="${pageContext.request.contextPath}/images/${item.poster }" alt="No image" width="80%" class="fluid"/>
-                  		
+                  		<img src="${pageContext.request.contextPath}/images/${item.poster}" alt="No image" width="80%" class="fluid"/>
                  	 <div class="row border-top mt-2">
                    		 <a href="${pageContext.request.contextPath}/details?VideoID=${item.id}"><b>${item.title }</b>
                    		 </a>

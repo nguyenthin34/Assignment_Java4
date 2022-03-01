@@ -38,7 +38,7 @@ import com.poly.helper.CookieUtils;
 import com.poly.helper.XScope;
 
 
-@WebServlet({"/","/UserServlet","/UserServlet/list", "/UserServlet/register", "/signin","/details", 
+@WebServlet({"/","/UserServlet","/UserServlet/list", "/register", "/signin","/details", 
 	"/UserServlet/likevd", "/UserServlet/move/*", "/UserServlet/myfavorite", "/UserServlet/unlike", "/UserServlet/sendemail"
 	, "/UserServlet/share", "/UserServlet/forgot", "/UserServlet/change", "/UserServlet/profile"
 	, "/UserServlet/updateprofile", "/logoff", "/findtitle", "/UserServlet/home"})
@@ -432,10 +432,14 @@ public class UserServlet extends HttpServlet {
 				User user = daou.findByID(userid);
 				Date date = new Date();
 				Properties prop = new Properties();
-				prop.put("mail.smtp.host", "smtp.gmail.com");
-				prop.put("mail.smtp.port", "587");
-				prop.put("mail.smtp.auth", "true");
-				prop.put("mail.smtp.starttls.enable", "true");
+				prop.setProperty("mail.smtp.auth", "true");
+				prop.setProperty("mail.smtp.starttls.enable", "true");
+				prop.setProperty("mail.smtp.host", "smtp.gmail.com");
+				prop.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+				prop.put("mail.smtp.ssl.protocols", "TLSv1.2");
+				prop.setProperty("mail.smtp.port", "587");
+				
+				
 				Session session = Session.getInstance(prop, new Authenticator() {
 					protected PasswordAuthentication getPasswordAuthentication() {
 						return new PasswordAuthentication(username, password);
@@ -470,7 +474,7 @@ public class UserServlet extends HttpServlet {
 	protected void EmailForgotPass(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			final String username = "nguyenthin34hd@gmail.com";
-			final String password = "thin280101";
+			final String password = "Thin280101";
 			String userf = request.getParameter("username");
 			String emailf = request.getParameter("email");
 			UserDAO daou = new UserDAO();
@@ -480,6 +484,8 @@ public class UserServlet extends HttpServlet {
 				prop.put("mail.smtp.host", "smtp.gmail.com");
 				prop.put("mail.smtp.port", "587");
 				prop.put("mail.smtp.auth", "true");
+				prop.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+				prop.put("mail.smtp.ssl.protocols", "TLSv1.2");
 				prop.put("mail.smtp.starttls.enable", "true");
 				Session session = Session.getInstance(prop, new Authenticator() {
 					protected PasswordAuthentication getPasswordAuthentication() {
@@ -561,11 +567,13 @@ public class UserServlet extends HttpServlet {
 	protected void Mail(HttpServletRequest request, HttpServletResponse response, User user)
 			throws ServletException, IOException{
 		final String username = "nguyenthin34hd@gmail.com";
-		final String password = "thin280101";
+		final String password = "Thin280101";
 			Properties prop = new Properties();
 			prop.put("mail.smtp.host", "smtp.gmail.com");
 			prop.put("mail.smtp.port", "587");
 			prop.put("mail.smtp.auth", "true");
+			prop.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+			prop.put("mail.smtp.ssl.protocols", "TLSv1.2");
 			prop.put("mail.smtp.starttls.enable", "true");
 			Session session = Session.getInstance(prop, new Authenticator() {
 				protected PasswordAuthentication getPasswordAuthentication() {

@@ -20,7 +20,7 @@
   </head>
 
   <body>
-  <c:url var="url" value="/UserServlet"></c:url>
+  <c:url var="url" value="/"></c:url>
    
     <!-- Main Content -->
 	<div class="container-fluid">
@@ -35,7 +35,7 @@
 						
 					</div>
 					<div class="row">
-						<form control="" class="form-group" action="${url }/forgot" method="post">
+						<form control="" class="form-group" action="${url }forgot" method="post">
 							<div class="row">
 								<input type="text" name="username" id="username" class="form__input" placeholder="Username"
 								required pattern="[a-zA-Z0-9]+" title="Invalid character">

@@ -21,10 +21,9 @@
   <c:url var="url" value="/AdminServlet"></c:url>
 
     <div  class="container rounded bg-white mt-5 mb-5">
-     <form action="${url }" method="post" enctype="multipart/form-data">
+     <form action="${url }/updatevideo" method="post" enctype="multipart/form-data">
      	 <div class="row">
      	 <h1>
-     	 <Context docBase="C:\tmp0\" path="/images" />
      	 </h1>
         <div class="col-md-5 border-right">
           <div class="d-flex flex-column align-items-center text-center p-3 py-5">

@@ -38,9 +38,7 @@ import com.poly.helper.XScope;
 	,"/AdminServlet/home","/signout"})
 public class AdminServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	/**
-	 *
-	 */
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String uri = request.getRequestURI();
 		VideoDAO dao = new VideoDAO();
@@ -258,7 +256,7 @@ public class AdminServlet extends HttpServlet {
 			} catch (Exception e) {
 				request.setAttribute("message", "Update Failed");
 				request.setAttribute("views", "editvideo.jsp");
-				e.printStackTrace();
+				System.out.println("loi video " + e.getMessage());
 			}
 		}else {
 			request.setAttribute("message", "Video not exists");
@@ -337,7 +335,7 @@ public class AdminServlet extends HttpServlet {
 				request.setAttribute("views", "edituser.jsp");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("lỗi" + e.getMessage());
 			request.setAttribute("message", "Update failed");
 			request.setAttribute("views", "edituser.jsp");
 		}

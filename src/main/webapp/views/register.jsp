@@ -19,7 +19,7 @@
     />
   </head>
   <body>
-  <c:url var="url" value="/UserServlet"></c:url>
+  <c:url var="url" value="/"></c:url>
     <div class="container bd">
       <div class="row">
         <div class="col-lg-10 col-xl-9 mx-auto">
@@ -33,7 +33,7 @@
               <h5 class="card-title text-center mb-5 fw-light fs-5">
                 Register
               </h5>
-              <form action="${url }/register" method="post">
+              <form action="${url }register" method="post">
                 <div class="form-floating mb-3">
                   <input
                     type="text"
@@ -113,7 +113,7 @@
                   </button>
                 </div>
 
-                <a class="d-block text-center mt-2 small" href="${url }/signin"
+                <a class="d-block text-center mt-2 small" href="${url }signin"
                   >Have an account? Sign In</a
                 >
 

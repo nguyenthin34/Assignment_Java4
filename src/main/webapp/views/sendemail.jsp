@@ -20,7 +20,7 @@
       <p class="subscribe__copy">
        		http://localhost:8080/Assigment/UserServlet/details?VideoID=<span>${videoid }</span>
       </p>
-      <form action="${url }" method="post">
+      <form method="post">
       	<div class="form">
         <input
           type="email"
